@@ -1,0 +1,1 @@
+Eine Umwandlungsfunktion von .xlsx auf .mat kann unter Studenten/Laufende_Entwicklungen/Umwandlung_Fahrzyklen aufgerufen werden.
