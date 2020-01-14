@@ -106,7 +106,7 @@ classdef acquisitionCosts < handle
     
     methods
         %% Class Constructor
-        function obj = acquisitionCosts(Param, init, Vehicle)
+        function obj = acquisitionCosts(Param, init)
             if init
                 obj.Getr_m      = Param.weights.m_Gearbox;
                 obj.Motor_m     = Param.weights.m_Engine;
@@ -139,10 +139,10 @@ classdef acquisitionCosts < handle
                     obj.WPT = 1;
                 end
                 
-                switch Vehicle
-                    case 'BEV_OC'
+%                 switch Vehicle
+%                     case 'BEV_OC'
                         obj.KWPT = 10000;
-                end
+%                 end
             end
         end
         %% Calculations

@@ -361,9 +361,9 @@ function [ Param ] = Parameterizing(Fueltype, x, ifElectric, Vehicle, ifOptimize
     end
 %% Classes initialization
     % Wolff 2017
-    Param.weights = weights(Param, true, Vehicle); % initialize weights
-    [Param] = Weights_calculation(Param, Vehicle); % Run weights calculation
-    Param.acquisitionCosts = acquisitionCosts(Param, true, Vehicle); % Acquisition cost initialization
+    Param.weights = weights(Param, true); % initialize weights
+    [Param] = Weights_calculation(Param); % Run weights calculation
+    Param.acquisitionCosts = acquisitionCosts(Param, true); % Acquisition cost initialization
     
     % TCO initialization (Schatkowski)
     helpStruct = load('costStruct.mat');

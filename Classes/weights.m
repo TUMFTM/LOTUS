@@ -60,7 +60,7 @@ classdef weights
     methods
         % class constructor
         % Takes Param as input and assigns parameters to class propertie
-        function obj = weights(Param, init, Vehicle)
+        function obj = weights(Param, init)
             if init
                 % Check if field exists, Standard is set as default
                 if isfield(Param.vehicle, 'long_truck') && Param.vehicle.long_truck
