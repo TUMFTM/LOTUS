@@ -1,4 +1,4 @@
-function [Param] = Weights_calculation(Param)
+function [Param] = Weights_calculation(Param, Vehicle)
 % Designed by Sebastian Wolff in FTM, Technical University of Munich
 %-------------
 % Created on: 27.06.2016 
@@ -97,13 +97,13 @@ switch Param.Fueltype
         m_LE = Param.em.P_max / 10.8; % Power electronics [7]
         
         if Param.WPT.Voltage % Inductive charging weight
-%             switch Vehicle
-%                 case 'BEV_OC'
+            switch Vehicle
+                case 'BEV_OC'
                     m_On_Board_Charger = 600; % Zusatzgewicht System[5]
                 
-%                 otherwise
+                otherwise
                     m_On_Board_Charger = 591; % Inductive charging prototype weight [6]
-%             end
+            end
             
         else
             m_On_Board_Charger = 15; % Brusa LG6 on-board fast charger for three-phase current
