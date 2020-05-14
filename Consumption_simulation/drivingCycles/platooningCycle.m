@@ -116,13 +116,13 @@ cycleTrail.delta12 = cycleTrail.delta23;
 
 cycle = cycleLead;
 %save('C:\Users\Max\Desktop\HiWi\Sebastian Wolff\Truck_Simulation_Publication_git\Consumption_simulation\Fahrzyklen\cycle_Platooning_leadTruck.mat', 'cycle')
-save('\Truck Simulation\Consumption_simulation\Fahrzyklen\cycle_Platooning_leadTruck.mat', 'cycle')
+save('\Truck Simulation\Consumption_simulation\drivingCycles\cycle_Platooning_leadTruck.mat', 'cycle')
 cycle = cycleMiddle;
 %save('C:\Users\Max\Desktop\HiWi\Sebastian Wolff\Truck_Simulation_Publication_git\Consumption_simulation\Fahrzyklen\cycle_Platooning_middleTruck.mat', 'cycle')
-save('\Truck Simulation\Consumption_simulation\Fahrzyklen\cycle_Platooning_middleTruck.mat', 'cycle')
+save('\Truck Simulation\Consumption_simulation\drivingCycles\cycle_Platooning_middleTruck.mat', 'cycle')
 cycle = cycleTrail;
 %save('C:\Users\Max\Desktop\HiWi\Sebastian Wolff\Truck_Simulation_Publication_git\Consumption_simulation\Fahrzyklen\cycle_Platooning_trailingTruck.mat', 'cycle')
-save('\Truck Simulation\Consumption_simulation\Fahrzyklen\cycle_Platooning_trailingTruck.mat', 'cycle')
+save('\Truck Simulation\Consumption_simulation\drivingCycles\cycle_Platooning_trailingTruck.mat', 'cycle')
 
 
 
