@@ -1,7 +1,7 @@
-# HDVSim - Truck 2030 Longitudinal Dynamics Simulation
+# LOTUS - Long-Haul Truck Simulation
 
-Stand Alone Version of the longitudinal dynamics, weight and cost model of the Truck2030 project.  
-Please also see the project homepage [Truck2030](https://www.truck2030.tum.de/home/) and our [researchgate profile](https://www.researchgate.net/project/Truck2030) to find more information about us and our work.
+Stand Alone Version of the longitudinal dynamics, weight and cost model of the Truck2030 project (formerly named HDVSim).  
+Please also see the project homepage [Truck2030](https://www.mw.tum.de/en/ftm/main-research/vehicle-concepts/truck-2030-bavarian-cooperation-for-transport-efficiency/) and our [researchgate profile](https://www.researchgate.net/project/Truck2030) to find more information about us and our work.
 
 
 ## Steps for running the simulation
@@ -41,9 +41,11 @@ Please also see the project homepage [Truck2030](https://www.truck2030.tum.de/ho
 * Optimization Toolbox
 * Simulink
 * Simscape
-* Power System Blocks
+* Powertrain Blockset
+* Simscape Electrical (Replaces Simscape Power Systems and Simscape Electronics 2018b and later)
+* Simscape Power System (2018a and earlier)
+* Simscape Electronics (2018a and earlier)
 * Stateflow
-* Simscape Electrical
 * Simulink Coder
 * Parallel Computing
 
@@ -66,9 +68,14 @@ Auswertung_JounralIndEco
 ```
 
 ## Deployment
-Built With
+Built with
 
 * [Matlab](https://de.mathworks.com/products/matlab.html) R2018b
+
+Tested with
+* Matlab R2017b
+* Matlab R2019b
+
 
 
 ## Contributing and Support
@@ -102,7 +109,7 @@ This project is licensed under the LGPL 3.0 License - see the LICENSE.md file fo
 
 * M. Fries, “Maschinelle Optimierung der Antriebsauslegung zur Reduktion von CO2-Emissionen und Kosten im Nutzfahrzeug, Dissertation, Lehrstuhl für Fahrzeugtechnik, Technische Universität München, München, 2018.
 
-### Papers
+### Publications
 
 * C. Mährle, S. Wolff, S. Held, G. Wachtmeister - "Influence of the Cooling System and Road Topology on Heavy Duty Truck Platooning", 2019
 * S. Wolff, M. Fries, M. Lienkamp - "Techno-Ecological Analysis of Energy Carriers for Long-Haul Transportation", 2019.
