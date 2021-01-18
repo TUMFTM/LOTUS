@@ -100,7 +100,7 @@ Michael Fries - Hybrid Drivetrains, CNG, LNG, Dual Fuel, Cost and Weight Model
 
 Sebastian Wolff* - Battery Electric, Fuel Cell, Overhead Catenary/Inductive Charging, 3 Truck Platooning, Infrastructure Cost Model, Electric Powertrain Topologies
 
-*Correspondance Author  
+*Correspondence Author  
 sebastian.wolff[at]tum.de  
 Technical University of Munich  
 Institute of Automotive Technology
