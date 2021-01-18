@@ -58,6 +58,10 @@ switch Driving_cylce
         load(['cycle_Platooning_middleTruck' '.mat'])
     case 19
         load(['cycle_Platooning_trailingTruck' '.mat'])
+    case 20
+        load(['cycle_VECTO_Long_Haul' '.mat'])
+    case 21
+        load(['cycle_VECTO_Regional_Delivery' '.mat'])
 end
 
 if ~isfield(cycle, 'delta12')

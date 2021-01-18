@@ -22,6 +22,7 @@ function [em, Bat] = Electric_drivetrain(x)
     em.P_max                             = ((em.n_eck * em.M_max *2* pi)/60)/1000; %[kW] Maximum power
     em.Type                              = x(13); % Electrical machine type 1: PMSM; 2: ASM
     em.n_max                             = 10000; % Maximum rotational speed
+    em.noEM                              = 1; % Default number of electric machines
     
     % Battery parameters
     %Bat.Voltage                        = x(3); % Not used in this case

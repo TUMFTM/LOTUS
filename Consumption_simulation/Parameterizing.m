@@ -65,10 +65,10 @@ function [ Param ] = Parameterizing(Fueltype, x, ifElectric, Vehicle, ifOptimize
     %vehicle.payload = 13120; % [kg] weight for the automotive goods 
 
     % Active cruise control [3]
-    preditiveCruiseControl = 1;      % Active cruise control 1 = ON 0 = OFF
+    preditiveCruiseControl = 0;      % Active cruise control 1 = ON 0 = OFF
 
     % Cruising [3]
-    Sailing_without_drag_torque = 1;    % ON or OFF
+    Sailing_without_drag_torque = 0;    % ON or OFF
 
     % Additional factors
     ambient.gravity        = 9.80665; %[m/s^2] gravity

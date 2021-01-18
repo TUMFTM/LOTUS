@@ -1,4 +1,4 @@
-function [Fueltype, vehicle_param, ifElectric, Vehicle] = FuelOptimisation(ifOptimized)
+function [Fueltype, vehicle_param, ifElectric, Vehicle] = FuelOptimisation(ifOptimized, Fueltype)
 
 
 %%  Fuel type - define used Fuel type  
@@ -8,7 +8,7 @@ if ifOptimized == false
 %     Fueltype = 1;     % Diesel
 %     Fueltype = 2;     % CNG
 %     Fueltype = 3;     % LNG
-    Fueltype = 4;     % Diesel Hybrid
+%     Fueltype = 4;     % Diesel Hybrid
 %     Fueltype = 5;     % CNG Hybrid
 %     Fueltype = 6;     % LNG Hybrid
 %     Fueltype = 7;     % Electric
