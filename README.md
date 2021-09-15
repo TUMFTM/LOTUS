@@ -147,6 +147,7 @@ The simulation is featured in the following publications:
 ### Dissertations
 
 * M. Fries, “Maschinelle Optimierung der Antriebsauslegung zur Reduktion von CO2-Emissionen und Kosten im Nutzfahrzeug,” Dissertation, Lehrstuhl für Fahrzeugtechnik, Technische Universität München, München, 2018.
+* A. Süßmann, „Kundenspezifische Bewertung von Maßnahmen zur Reduktion des Kraftstoffverbrauchs bei schweren Nutzfahrzeugen [Customer-specific evaluation of measures to reduce fuel consumption in heavy commercial vehicles]“. Dissertation, Lehrstuhl für Fahrzeugtechnik, Technische Universität München, München, 2021.
 ### Articles
 
 * M. Fries, M. Kruttschnitt, und M. Lienkamp, “Multi-objective optimization of a long-haul truck hybrid operational strategy and a predictive powertrain control system,” in Twelfth International Conference on Ecological Vehicles and Renewable Energies (EVER), 2017, S. 1–7.
