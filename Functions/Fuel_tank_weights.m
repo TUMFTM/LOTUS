@@ -18,8 +18,8 @@ function [m_kraftstoff, m_tank] = Fuel_tank_weights(Param)
 %                           fuel
 % ------------
 %% Sources
-% [1]	M. Fries, “Maschinelle Optimierung der Antriebsauslegung zur Reduktion von CO2-Emissionen und Kosten im Nutzfahrzeug,” Dissertation, Lehrstuhl für Fahrzeugtechnik, Technische Universität München, München, 2018.
-% [2]	W. Artl, “Wasserstoff und Speicherung im Schwerlastverkehr: Machbarkeitsstudie,” Friedrich-Alexander Universität Erlangen-Nürnberg, Erlangen, 2018. [Online] Verfügbar: https://www.tvt.cbi.uni-erlangen.de/LOHC-LKW_Bericht_final.pdf. Gefunden am: Mai. 02 2018.
+% [1]	M. Fries, ï¿½Maschinelle Optimierung der Antriebsauslegung zur Reduktion von CO2-Emissionen und Kosten im Nutzfahrzeug,ï¿½ Dissertation, Lehrstuhl fï¿½r Fahrzeugtechnik, Technische Universitï¿½t Mï¿½nchen, Mï¿½nchen, 2018.
+% [2]	W. Artl, ï¿½Wasserstoff und Speicherung im Schwerlastverkehr: Machbarkeitsstudie,ï¿½ Friedrich-Alexander Universitï¿½t Erlangen-Nï¿½rnberg, Erlangen, 2018. [Online] Verfï¿½gbar: https://www.tvt.cbi.uni-erlangen.de/LOHC-LKW_Bericht_final.pdf. Gefunden am: Mai. 02 2018.
 % ------------
 
     rho_diesel = 0.85;
@@ -55,8 +55,16 @@ function [m_kraftstoff, m_tank] = Fuel_tank_weights(Param)
             m_kraftstoff = Param.tank.v_diesel * rho_diesel + rho_cng * Param.tank.v_cng + rho_lng * Param.tank.v_lng;
             m_tank = m_diesel + m_lng + 20; % 20kg extra weight for dual fuel. Source: SA Jon Schmidt
 
-        case {13}
-            m_tank = Param.tank.m_h2 * 17.5;    % [2]
-            m_kraftstoff = Param.tank.m_h2;        
+        case {13, 14, 15} % Hydrogen
+           %m_tank = Param.tank.m_h2 * 17.5;    % [2] 
+           %m_tank = Param.tank.m_h2 * 15.85;    % Mauk, Paul SA p. 30
+            m_tank = Param.tank.m_h2 * 18; %Eidkum, Niclas BA
+            m_kraftstoff = Param.tank.m_h2;   
+        
+        case {16, 17} % Dual Fuel Diesel + Hydrogen (Composite Tank)
+            m_diesel = 17.159 * log(Param.tank.v_diesel) - 54.98;
+            m_h2 = Param.tank.m_h2 * 18;    %Eidkum, Niclas BA
+            m_kraftstoff = Param.tank.v_diesel * rho_diesel + Param.tank.m_h2;
+            m_tank = m_diesel + m_h2 + 20; % 20kg extra weight for dual fuel. Source: SA Jon Schmidt
     end
 end

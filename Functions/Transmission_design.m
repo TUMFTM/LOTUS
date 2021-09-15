@@ -20,14 +20,14 @@ function [transmission, final_drive, engine] = Transmission_design(x, Fueltype)
 %                           variables such as torque and power
 % ------------    
     switch Fueltype
-        case {1,2,3} % {'Diesel','CNG','LNG'}
+        case {1,2,3,14} % {'Diesel','CNG','LNG','H2ICE'}
             transmission                      = Transmission_gearing(x(1), x(2), x(3), x(4), x(5));  
             final_drive.ratio                 = x(5);
             engine.M_max                      = x(6);
             engine.shift_parameter.n_lo       = x(7); % lower shifting threshold
             engine.shift_parameter.n_pref     = x(8); % upper shifting threshold
         
-        case {4,5,6} % {'Diesel-Hybrid','CNG-Hybrid','LNG-Hybrid'}
+        case {4,5,6,15} % {'Diesel-Hybrid','CNG-Hybrid','LNG-Hybrid','H2-Hybrid'}
             transmission                      = Transmission_gearing(x(1), x(2), x(3), x(4), x(5));  
             final_drive.ratio                 = x(5);
             engine.M_max                      = x(6);
@@ -40,14 +40,14 @@ function [transmission, final_drive, engine] = Transmission_design(x, Fueltype)
             engine.shift_parameter.n_lo       = x(10); 
             engine.shift_parameter.n_pref     = x(11);
             
-        case {8,9} % Dual-Fuel {CNG, LNG}
+        case {8,9,16} % Dual-Fuel {CNG, LNG, H2}
             transmission                      = Transmission_gearing(x(1), x(2), x(3), x(4), x(5));  
             final_drive.ratio                 = x(5);
             engine.M_max                      = x(6);
             engine.shift_parameter.n_lo       = x(7); 
             engine.shift_parameter.n_pref     = x(8); 
             
-        case {10,11} % Dual-Fuel Hybrid {CNG, LNG}
+        case {10,11,17} % Dual-Fuel Hybrid {CNG, LNG, H2}
             transmission                      = Transmission_gearing(x(1), x(2), x(3), x(4), x(5));  
             final_drive.ratio                 = x(5);
             engine.M_max                      = x(6);

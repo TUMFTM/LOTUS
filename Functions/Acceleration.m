@@ -1,7 +1,7 @@
 function [t_60_80] = Acceleration(VSim)
 
     % If the consumption simulation is performed
-    if (VSim.bDiesel ~= 0 || VSim.bGas ~= 0 || VSim.energyTotal ~= 0)
+    if (VSim.bDiesel ~= 0 || VSim.bGas ~= 0 || VSim.energyTotal ~= 0 || VSim.Hydrogen_consumption ~= 0)
             v80_1=0;
             for i=1:length(VSim.v_t)
                 if VSim.v_t(i)==0

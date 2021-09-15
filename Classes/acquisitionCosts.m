@@ -17,7 +17,7 @@ classdef acquisitionCosts < handle
 % [3]	L. C. den Boer, Zero Emissions Trucks: An Overview of State-of-the-art Technologies and Their Potential : Report: CE Delft, 2013.
 % [4]	Jason Marcinkoski, Jacob Spendelow, Adria Wilson, and Dimitrios Papageorgopoulos, U.S. Department of Energy, “DOE Fuel Cell Technologies Office Record: Fuel Cell System Cost,” Washington DC, USA, 2015. [Online] Verfügbar: https://www.hydrogen.energy.gov/pdfs/15015_fuel_cell_system_cost_2015.pdf. Gefunden am: Feb. 08 2018.
 % [5]	W. Artl, “Wasserstoff und Speicherung im Schwerlastverkehr: Machbarkeitsstudie,” Friedrich-Alexander Universität Erlangen-Nürnberg, Erlangen, 2018. [Online] Verfügbar: https://www.tvt.cbi.uni-erlangen.de/LOHC-LKW_Bericht_final.pdf. Gefunden am: Mai. 02 2018.
-% 
+% [6]   Cano, Zachary P.; Banham, Dustin; Ye, Siyu; Hintennach, Andreas; Lu, Jun; Fowler, Michael; Chen, Zhongwei (2018): Batteries and fuel cells for emerging electric vehicle markets. In: Nat Energy 3 (4), S. 279–289. DOI: 10.1038/s41560-018-0108-1.
 %
 %
 % ------------
@@ -28,7 +28,7 @@ classdef acquisitionCosts < handle
         ZM_sockelpreis  =   31698;                  % Production cost without engine, transmission, exhaust treatment & fuel tank [€]
         OEM_Rendite     =   1.064;                  % Return [%]
         Haendlermarge   =   1.15;                   % Dealer sale margin [%]
-        Overhead_costs    =   1.3429;                 % Overheads [%] 
+        Overhead_costs  =   1.3429;                 % Overheads [%] 
         
         % Transmission [1]
         KG                                          % Cost [€]
@@ -44,7 +44,8 @@ classdef acquisitionCosts < handle
         Motor_m         =   0;                      % Weight [kg]
         Motor_VK        =   3.172;                  % Production cost [€/Nm], source: Schaller & Maierhofer
         Motor_VK_Base   =   4272;                   % Base price for Euro VI Diesel engine [€]
-        Faktor_Gas      =   1.05;                   % Surcharge for gas engine [%], source: Schaller & Maierhofer       
+        Faktor_Gas      =   1.05;                   % Surcharge for gas engine [%], source: Schaller & Maierhofer     
+        Faktor_H2       =   2;                   % Annahme Niclas Eidkum    
         Mehrkosten_Dual =   2;                      % Extra cost for Dual-Fuel engine [€]
         Kosten_Kuehler  =   300;
         Kosten_Luefter  =   100;
@@ -59,8 +60,8 @@ classdef acquisitionCosts < handle
         Bat_type                                    % Battery type
         Bat_m           =   0;                      % Weight [kg]
         Bat_kWh         =   0;                      % Energy capacity [Wh]
-        Bat_VK_Pouch    =   176;                    % Production cost of PHEV battery pack 124*1.42 (BeV2PHEV = 1.42) [€/kWh] // Source: Kostenpaper Kerler 2017
-        Bat_VK_Cyl      =   210;                    % Production cost of PHEV battery pack 148*1.42 (BeV2PHEV = 1.42) [€/kWh] // Source: Kostenpaper Kerler 2017
+        Bat_VK_Pouch    =   140;                    % Production cost of PHEV battery pack 124*1.42 (BeV2PHEV = 1.42) [€/kWh] // Source: Kostenpaper Kerler 2017
+        Bat_VK_Cyl      =   140;                    % Production cost of PHEV battery pack 148*1.42 (BeV2PHEV = 1.42) [€/kWh] // Source: Kostenpaper Kerler 2017
         Bat_ZK          =   200;                    % Additional costs, source: Kostenpaper Kerler 2017
         Ratio_BEV2PHEV                              % Ratio of battery prices
         
@@ -84,7 +85,7 @@ classdef acquisitionCosts < handle
         FC
         P_FC
         FC_VK           =   54;                    % Production cost [€/kW], source: DOE Fuel Cell Technologies Office Record - Fuel Cell System Cost, 100.000 units/year, 2015
-        KTFC_VK         =   608;                   % Production cost of hydrogen tanks [€/kgH2]
+        KTFC_VK         =   580;                   % Production cost of hydrogen tanks [€/kgH2] [6]
         
         % Exhaust treatment [1]
         KA                                         % Cost [€]
@@ -95,8 +96,8 @@ classdef acquisitionCosts < handle
         v_diesel       % = 0;                        % Volume in l
         v_cng          % = 0;                        % Volume in l
         v_lng          % = 0;                        % Volume in l
-        m_h2
-        
+        m_h2                                         % Mass in kg   
+         
         KT                                          % Production cost of fuel tank [€]
         KTD                                         % Production cost of diesel tank in [€]
         KTCNG                                       % Production cost of CNG tank [€]
@@ -106,7 +107,7 @@ classdef acquisitionCosts < handle
     
     methods
         %% Class Constructor
-        function obj = acquisitionCosts(Param, init, Vehicle)
+        function obj = acquisitionCosts(Param, init)
             if init
                 obj.Getr_m      = Param.weights.m_Gearbox;
                 obj.Motor_m     = Param.weights.m_Engine;
@@ -123,13 +124,18 @@ classdef acquisitionCosts < handle
                 obj.v_lng       = Param.tank.v_lng;       % Volume of LNG in l
                 obj.v_cng       = Param.tank.v_cng;       % Volume of CNG in l
                 
-                if ~isfield(Param, 'FuelCell')
-                    obj.m_h2        = 0;
-                    obj.P_FC        = 0;
-                    
-                else
-                    obj.m_h2        = Param.tank.m_h2;
-                    obj.P_FC        = Param.FuelCell.P_nom;     % Fuel cell power
+                switch Param.Fueltype 
+                    case 13 %FCEV     
+                        obj.m_h2        = Param.tank.m_h2;
+                        obj.P_FC        = Param.FuelCell.P_nom;     % Fuel cell power
+                       
+                    case {14,15,16,17} %H2ICE
+                        obj.m_h2        = Param.tank.m_h2;
+                        obj.P_FC        = 0;
+                       
+                    otherwise     
+                      	obj.m_h2        = 0;
+                        obj.P_FC        = 0;
                 end
                 
                 if ~isfield(Param, 'WPT') || ~Param.WPT.Voltage
@@ -139,10 +145,10 @@ classdef acquisitionCosts < handle
                     obj.WPT = 1;
                 end
                 
-                switch Vehicle
-                    case 'BEV_OC'
+%                 switch Vehicle
+%                     case 'BEV_OC'
                         obj.KWPT = 10000;
-                end
+%                 end
             end
         end
         %% Calculations
@@ -158,13 +164,18 @@ classdef acquisitionCosts < handle
                     + obj.Kosten_Luefter;
                 
                 % Dual Fuel engine
-            elseif (obj.v_lng ~= 0 || obj.v_cng ~= 0) && obj.v_diesel ~= 0
+            elseif (obj.v_lng ~= 0 || obj.v_cng ~= 0|| obj.m_h2 ~= 0) && obj.v_diesel ~= 0
                 KMot = ((obj.Motor_Mmax * obj.Motor_VK + obj.Motor_VK_Base) + 400)* obj.Mehrkosten_Dual + obj.Kosten_Kuehler ...
                     + obj.Kosten_Luefter;
                 
                 % EURO VI diesel engine 
-            elseif (obj.v_lng == 0 && obj.v_cng ~= 0) || obj.v_diesel ~= 0
+            elseif (obj.v_lng == 0 && obj.v_cng == 0) || obj.v_diesel ~= 0
                 KMot = obj.Motor_Mmax * obj.Motor_VK + obj.Motor_VK_Base + obj.Kosten_Kuehler ...
+                    + obj.Kosten_Luefter;
+                
+                % Hydrogen Combustion Engine
+            elseif obj.m_h2 ~= 0 && obj.P_FC == 0
+                KMot = (obj.Motor_Mmax * obj.Motor_VK + obj.Motor_VK_Base) * obj.Faktor_H2  + obj.Kosten_Kuehler ...
                     + obj.Kosten_Luefter;
                 
                 % Electric truck
@@ -177,10 +188,10 @@ classdef acquisitionCosts < handle
         % Convert the cost of BEV, source: Kostenpaper 2017
         function Ratio_BEV2PHEV = get.Ratio_BEV2PHEV(obj)
             if obj.Elektro
-                Ratio_BEV2PHEV = 1.42;
+                Ratio_BEV2PHEV = 1;
                 
             else
-                Ratio_BEV2PHEV = 1;
+                Ratio_BEV2PHEV = 1.42;
             end
         end
         
@@ -189,10 +200,10 @@ classdef acquisitionCosts < handle
             if obj.Bat_m ~= 0
                 switch obj.Bat_type
                     case {1}
-                        Bat = obj.Bat_kWh * (obj.Bat_VK_Cyl/obj.Ratio_BEV2PHEV) + obj.Bat_ZK;
+                        Bat = obj.Bat_kWh * (obj.Bat_VK_Cyl*obj.Ratio_BEV2PHEV) + obj.Bat_ZK;
                         
                     case {2}
-                        Bat = obj.Bat_kWh * (obj.Bat_VK_Pouch/obj.Ratio_BEV2PHEV) + obj.Bat_ZK;
+                        Bat = obj.Bat_kWh * (obj.Bat_VK_Pouch*obj.Ratio_BEV2PHEV) + obj.Bat_ZK;
                         
                     otherwise
                         error('Please indicate a valid battery type')
@@ -256,7 +267,7 @@ classdef acquisitionCosts < handle
         
         function KTFC = get.KTFC(obj)
             if obj.m_h2 ~= 0
-                KTFC = (8.0305 * obj.v_lng + 1480.2);
+                KTFC = obj.KTFC_VK * obj.m_h2;
                 
             else
                 KTFC = 0;
@@ -269,12 +280,12 @@ classdef acquisitionCosts < handle
         
         %% Exhaust treatment cost
         function KA = get.KA(obj)
-                % Cost for gas engine
-            if (obj.v_lng ~= 0 || obj.v_cng ~= 0) && obj.v_diesel == 0
+                % Cost for gas engine or H2ICE because of NOx
+            if (obj.v_lng ~= 0 || obj.v_cng ~= 0 || obj.m_h2 ~=0) && obj.v_diesel == 0
                 KA = obj.KAG;
                 
-                % Cost ofr duel-fuel engine
-            elseif (obj.v_lng ~= 0 || obj.v_cng ~= 0) && obj.v_diesel ~= 0
+                % Cost for dual-fuel engine
+            elseif (obj.v_lng ~= 0 || obj.v_cng ~= 0 || obj.m_h2 ~=0) && obj.v_diesel ~= 0
                 KA = obj.KAD;
                 
                 % Cost for EURO VI diesel engine

@@ -54,6 +54,7 @@ classdef TCO < handle
             Average_speed                                   %   km/h
 %           Average_speed_unbel                             %   km/h
             Daily_driving_time                              %   h
+            rangeElectric                                   %   km
             Annual_mileage                                  %   km
             Operating_life                                  %   Years
             Tire_mileage                                    %   km
@@ -87,6 +88,7 @@ classdef TCO < handle
             Lebensdauer_Batteriepack                         %   Jahr
             Anschaffungspreis_Akkupack                       %   €
             Verschleisskosten_Batteriepack                   %   €
+            residualValueBattery                             %   €
             %Verschleissbatteriepack                         %   1/km
             Sum_variable_costs                           %   €
             
@@ -314,7 +316,7 @@ classdef TCO < handle
                 Residual_value = round(max(0,(obj.Purchase_price)*0.8- ...
                     ((obj.Operating_life- ...
                     ones(1,length(obj.Operating_life))).* ...
-                    (obj.Purchase_price)*0.1)),0);
+                    (obj.Purchase_price)*0.1)) + obj.residualValueBattery,0);
         end
             
             % Amortization_value = Replacement_original_price - Residual_value -
@@ -398,9 +400,15 @@ classdef TCO < handle
             % Annual_mileage = Average_speed *
             % Daily_driving_time * Einsatztage/Jahr
         function Annual_mileage = get.Annual_mileage(obj)
-            Annual_mileage = round(obj.Average_speed* ...
+            if obj.rangeElectric >= obj.Average_speed*obj.Daily_driving_time
+                Annual_mileage = round(obj.Average_speed* ...
                 obj.Daily_driving_time*obj.Operating_days_year* ...
                 ones(1,length(obj.Purchase_price)),0);
+            else
+                Annual_mileage = round(obj.rangeElectric*...
+                    obj.Operating_days_year*...
+                    ones(1,length(obj.Purchase_price)),0);
+            end
         end
             % Afa (leistungsabhängig)
         function Afa_power_dependent = get.Afa_power_dependent(obj)

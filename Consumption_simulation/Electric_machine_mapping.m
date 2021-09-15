@@ -1,6 +1,7 @@
 function [em, Hybrid_Truck, Electric_Truck] = Electric_machine_mapping( Fueltype, Eckdrehzahl, Maximales_Drehmoment, Maximale_Drehzahl, Spannung, Maximale_Leistung, typ_EM, ifOptimized)
 % Designed by Sebastian Wolff at FTM, Technical University of Munich
 %-------------
+%Param.Fueltype, Param.em.n_eck, Param.em.M_max, Param.em.n_max, Param.Bat.Voltage, Param.em.P_max, Param.em.Type, false
 % Created in: 2017
 % ------------
 % Version: Matlab2017b
@@ -49,13 +50,14 @@ function [em, Hybrid_Truck, Electric_Truck] = Electric_machine_mapping( Fueltype
     % end
 
     switch Fueltype
-        case {4,5,6,10,11}
+        case {4,5,6,10,11,15,17}
             Hybrid_Truck = 1;                               % Hybrid_Truck 1 = ON, there is electrification, even with pure electric drive 
             Electric_Truck = 0;                              % Electric_Truck 0 = OFF, there is no pure electric drive only
 
-            em.P_max = Maximale_Leistung;                 %[kW] Maximum power
+            %em.P_max = Maximale_Leistung;                 %[kW] Maximum power
             em.M_max = Maximales_Drehmoment;              %[Nm] Maximum torque
-            em.n_eck = Eckdrehzahl;                       %[1/min] Rotational speed
+            em.n_eck = Eckdrehzahl;
+            em.P_max = ((em.n_eck * em.M_max *2* pi)/60)/1000;
             em.n_max = Maximale_Drehzahl;                 %[1/min] Maximum rotational speed   
 
     %         em.M_max = Maximales_Drehmoment;                   %[Nm] Maximum torque
@@ -89,7 +91,7 @@ function [em, Hybrid_Truck, Electric_Truck] = Electric_machine_mapping( Fueltype
     %             em.P_max = ((em.n_eck * em.M_max *2* pi)/60)/1000; %[kW] Maximum power
     %         end
 
-        case {1,2,3,8,9}
+        otherwise
             Hybrid_Truck = 0;                               % Hybrid_Truck 0 = OFF, there is only pure ICE engines
             Electric_Truck = 0;                              % Electric_Truck 0 = OFF, there is no pure electric drive only
 
@@ -98,9 +100,8 @@ function [em, Hybrid_Truck, Electric_Truck] = Electric_machine_mapping( Fueltype
 %             em.M_max = 630;     %[Nm]
 %             em.n_max = 2000;    %[rpm]
 
-            % Well-to-Wheel CO2-Emission according to [Edw14, S.122], average emissions
-            % After Eu-Mix (2017)
-            em.fuel.co2_per_kwh = 504;                  %[gCO2/kWh]
+            
+            
     end
 
     % Assignment of machine number (now takes place directly in VSim_parameterize)
@@ -125,9 +126,13 @@ function [em, Hybrid_Truck, Electric_Truck] = Electric_machine_mapping( Fueltype
     if Hybrid_Truck == 0 || (Electric_Truck == 0  && Maximales_Drehmoment == 1050 && Maximale_Drehzahl == 2000 && Spannung == 650 && typ_EM == 1)
               load('characteristic_map_em_standard_hybrid');
               
-    % If the default settings for electric vehicles have not been chosen
-    elseif Electric_Truck == 1 && Maximales_Drehmoment == 630 && Maximale_Drehzahl == 13000 && Spannung == 400 && typ_EM == 1
-              load('characteristic_map_em_standard_electric');
+    % If the default settings (E Force One) for electric vehicles have been chosen
+    elseif Electric_Truck == 1 && round(Maximales_Drehmoment) == 2041 && Maximale_Drehzahl == 4418 && Spannung == 800 && typ_EM == 2
+%               load('characteristic_map_em_standard_electric');
+              load('engineMap_EForce.mat');
+    % If the default settings (Nikola Tre) for fuel cell electric vehicles have been chosen
+    elseif Electric_Truck == 1 && round(Maximales_Drehmoment) == 452 && Maximale_Drehzahl == 4395 && Spannung == 800 && typ_EM == 2
+            load('engineMap_Nikola.mat');
     else
         %% Shifiting parameters
 
@@ -147,8 +152,10 @@ function [em, Hybrid_Truck, Electric_Truck] = Electric_machine_mapping( Fueltype
         em.shift_parameter.n6 = 0.8*em.n_max;                                              %Field weakening range is entered in the efficiency optimum range
 
         % Well-to-Wheel CO2-Emission according to [Edw14, S.122], average emissions
-        % afer Eu-Mix (2017)
-        em.fuel.co2_per_kwh = 504;                  %[gCO2/kWh]
+            % After Eu-Mix (2017)
+ %          em.fuel.co2_per_kwh = 504;                  %[gCO2/kWh]
+           em.fuel.co2_per_kwh = 478;                  %[gCO2/kWh] Status Elektromobilit�t 2020 "Referenz-Szenario 2020"
+ %           em.fuel.co2_per_kwh = 366;                  %[gCO2/kWh] Status Elektromobilit�t 2020 "Realistisches Szenario 2030"
 
         %% Electrical machine
         % Torque map adapted to motor data
@@ -172,7 +179,7 @@ function [em, Hybrid_Truck, Electric_Truck] = Electric_machine_mapping( Fueltype
         M_EM_nenn = em.M_max;  % [Nm]
         M_EM_max = em.M_max;   % [Nm] considering reasonable ratio of maximum to rated torque
         n_EM_nenn = em.n_eck;  % [1/min]
-        n_EM_max = em.n_max;   % [1/min] observing appropriate field weakening range
+        n_EM_max = em.n_max;  % [1/min] observing appropriate field weakening range
         P_EM_nenn = M_EM_nenn * n_EM_nenn/60*2*pi;
         %typ_EM = 'PMSM';    % 'ASM' or 'PMSM'
 
@@ -187,15 +194,15 @@ function [em, Hybrid_Truck, Electric_Truck] = Electric_machine_mapping( Fueltype
         [vektor_eta, step_M, step_n, vektor_M_max, vektor_M, vektor_n, M_EM_max, n_EM_nenn, m_EM, J_EM] = Interpolieren(M_EM_nenn, n_EM_nenn, M_EM_max, n_EM_max, P_EM_nenn, typ_EM);
 
         % Run the conversion script
-        [vektor_Pelv, vektor_Pelr, vektor_Irmsv, vektor_Irmsr, vektor_Urms] = Umrechnung(vektor_eta, M_EM_max, n_EM_nenn, U_Bat, cos_phi, step_n, step_M);
+        %[vektor_Pelv, vektor_Pelr, vektor_Irmsv, vektor_Irmsr, vektor_Urms] = Umrechnung(vektor_eta, M_EM_max, n_EM_nenn, U_Bat, cos_phi, step_n, step_M);
 
         % Run the LE_Berechnung.m script
-        [m_LE, eta_LE] = LE_Berechnung(P_EM_nenn, vektor_Pelv, vektor_Pelr, vektor_Irmsv, vektor_Irmsr, vektor_Urms, U_Bat, cos_phi);
+        %[m_LE, eta_LE] = LE_Berechnung(P_EM_nenn, vektor_Pelv, vektor_Pelr, vektor_Irmsv, vektor_Irmsr, vektor_Urms, U_Bat, cos_phi);
 
         % Calculation of overall efficiency of electric machine & power electronics
-        if eta_mit_LE == 1
-            vektor_eta = vektor_eta .* eta_LE;
-        end
+        %if eta_mit_LE == 1
+        %    vektor_eta = vektor_eta .* eta_LE;
+        %end
 
         % Preparing the data for DynA4
         Inrt_v = J_EM;
@@ -248,5 +255,9 @@ function [em, Hybrid_Truck, Electric_Truck] = Electric_machine_mapping( Fueltype
 
         % Assign remaining switching parameters
         em.shift_parameter.M_max = max(em.trq);
+    
+        % Default no. of Machines
+        em.noEM = 2;
     end
+
 end

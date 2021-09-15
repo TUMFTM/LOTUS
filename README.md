@@ -50,35 +50,53 @@ Please also see the project homepage [Truck2030](https://www.mw.tum.de/en/ftm/ma
 * Parallel Computing
 
 ## Running the Model/Code
-For basic simulation
+### Standard simulation
 ```
 Main_file.m
 ```
 
-C. Mährle, S. Wolff, S. Held, und G. Wachtmeister, “Influence of the Cooling System and Road Topology on Heavy Duty Truck Platooning,” in The 2019 IEEE Intelligent Transportation Systems Conference - ITSC: Auckland, New Zealand, 27-30 October 2019, [Piscataway, New Jersey]: IEEE, 2019, S. 1251–1256.
+### Influence of the Cooling System and Road Topology on Heavy Duty Truck Platooning
+C. Mährle, S. Wolff, S. Held, und G. Wachtmeister, in The 2019 IEEE Intelligent Transportation Systems Conference - ITSC: Auckland, New Zealand, 27-30 October 2019, [Piscataway, New Jersey]: IEEE, 2019, S. 1251–1256.
 ```
 platooningEvaluationParfor
 ```
 
-S. Wolff, M. Fries, und M. Lienkamp, “Technoecological analysis of energy carriers for long‐haul transportation,” Journal of Industrial Ecology, Bd. 49, Rn. 11, S. 6402, 2019.
+### Technoecological analysis of energy carriers for long‐haul transportation
+S. Wolff, M. Fries, und M. Lienkamp, Journal of Industrial Ecology, Bd. 49, Rn. 11, S. 6402, 2019.
 ```
 addpath('Post-processing\JIE');
 Infrastruktur_Fahrzeuge_Auswertung
 Auswertung_JounralIndEco
 ```
 
-S. Wolff, S. Kalt, M. Bstieler, und M. Lienkamp, “Influence of Powertrain Topology and Electric Machine Design on Efficiency of Battery Electric Trucks–A Simulative Case-Study,” Energies, Bd. 14, Rn. 2, S. 328, 2021.
+### Influence of Powertrain Topology and Electric Machine Design on Efficiency of Battery Electric Trucks–A Simulative Case-Study
+S. Wolff, S. Kalt, M. Bstieler, und M. Lienkamp, Energies, Bd. 14, Rn. 2, S. 328, 2021.
 ```
 topologiesMain
+```
+### Multi-disciplinary design optimization of life cycle eco-efficiency for heavy-duty vehicles using a genetic algorithm
+S. Wolff, M. Seidenfus, M. Brönner und M. Lienkamp, Journal of Cleaner Production, Jg. 318, S. 128505, 2021, doi: 10.1016/j.jclepro.2021.128505               
+
+To calculate the eco-efficiency for a specific vehicle, run:
+```
+CalculateEcoEff(Param, Weighting, 'ElectricityMix', 'UsePhase Diesel', 'UsePhase Hydrogen')
+```
+See the function description for possible parameters.
+
+To reproduce the data, scenarios and figures from the publication run
+```
+JCP_Scenarios
+JCP_PlotScript
 ```
 
 ## Deployment
 Built with
 
-* [Matlab](https://de.mathworks.com/products/matlab.html) R2018b
+* [Matlab](https://de.mathworks.com/products/matlab.html) R2020b
 
 Tested with
 * Matlab R2017b
+* Matlab R2018b
 * Matlab R2019b
 
 
@@ -92,13 +110,15 @@ V1.0 Consumption simulation, weight and cost model for heavy-duty trucks
 
 V1.1 Powertrain topologies for electric heavy-duty trucks and VECTO driving cycles
 
+V1.2 Eco-efficiency analysis
+
 
 ## Authors
 Alexander Süßmann - Consumption Simulation for Diesel Trucks, Validation
 
 Michael Fries - Hybrid Drivetrains, CNG, LNG, Dual Fuel, Cost and Weight Model
 
-Sebastian Wolff* - Battery Electric, Fuel Cell, Overhead Catenary/Inductive Charging, 3 Truck Platooning, Infrastructure Cost Model, Electric Powertrain Topologies
+Sebastian Wolff* - Battery Electric, Fuel Cell, Overhead Catenary/Inductive Charging, 3 Truck Platooning, Infrastructure Cost Model, Electric Powertrain Topologies, Eco-Efficiency Analysis
 
 *Correspondence Author  
 sebastian.wolff[at]tum.de  
@@ -127,7 +147,6 @@ The simulation is featured in the following publications:
 ### Dissertations
 
 * M. Fries, “Maschinelle Optimierung der Antriebsauslegung zur Reduktion von CO2-Emissionen und Kosten im Nutzfahrzeug,” Dissertation, Lehrstuhl für Fahrzeugtechnik, Technische Universität München, München, 2018.
-
 ### Articles
 
 * M. Fries, M. Kruttschnitt, und M. Lienkamp, “Multi-objective optimization of a long-haul truck hybrid operational strategy and a predictive powertrain control system,” in Twelfth International Conference on Ecological Vehicles and Renewable Energies (EVER), 2017, S. 1–7.
@@ -135,6 +154,7 @@ The simulation is featured in the following publications:
 * M. Fries, A. Baum, M. Wittmann, und M. Lienkamp, “Derivation of a real-life driving cycle from fleet testing data with the Markov-Chain-Monte-Carlo Method,” in 2018 21st International Conference on Intelligent Transportation Systems (ITSC): IEEE, 2018, S. 2550–2555.
 * S. Wolff, M. Fries, und M. Lienkamp, “Technoecological analysis of energy carriers for long‐haul transportation,” Journal of Industrial Ecology, Bd. 49, Rn. 11, S. 6402, 2019.
 * S. Wolff, S. Kalt, M. Bstieler, und M. Lienkamp, “Influence of Powertrain Topology and Electric Machine Design on Efficiency of Battery Electric Trucks–A Simulative Case-Study,” Energies, Bd. 14, Rn. 2, S. 328, 2021.
+* S. Wolff, M. Seidenfus, M. Brönner und M. Lienkamp, „Multi-disciplinary design optimization of life cycle eco-efficiency for heavy-duty vehicles using a genetic algorithm“, Journal of Cleaner Production, Jg. 318, S. 128505, 2021, doi: 10.1016/j.jclepro.2021.128505                                                  .
 
 ### Reports
 * C. Mährle et al, “Bayerische Kooperation für Transporteffizienz - Truck2030: Status Report 2016,” 2017.

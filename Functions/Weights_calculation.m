@@ -33,15 +33,15 @@ function [Param] = Weights_calculation(Param, Vehicle)
 
 %% Engine weight excluding the fuel [1, 2, 3, 4]
 switch Param.Fueltype
-    case {1, 4, 8, 9, 10, 11} % All variants with diesel engine (also for Dual Fuel)
+    case {1, 4, 8, 9, 10, 11, 16, 17} % All variants with diesel engine (also for Dual Fuel)
         % EURO VI class
         %m_engine = 0.429 * Param.engine.M_max + 183.92; % [kg] [1, 2]
         m_engine = 0.4061 * Param.engine.M_max + 147.65; % [kg] source: SAE paper, Fries
         diesel_abgas = 203.4; % [kg] Weight of exhaust treatment incl. AdBlue. Source: Ramon Tengel
         gas_abgas = 0; % [kg] Weight of exhaust treatment incl. AdBlue. Source: Ramon Tengel
-        
         % EURO V class
         %m_engine = 0.3441 * Param.engine.M_max + 153.64; % [kg] Source: SA Danninger S. 8
+        
         
     case {7, 12} % Pure electric
         m_engine = 0;
@@ -52,8 +52,9 @@ switch Param.Fueltype
         diesel_abgas = 0;
         gas_abgas = 0;
         m_engine = Param.FuelCell.P_nom / 1.02; % Source: PowerCell MS-100
+                
+    otherwise % All variants with gas engines. Type of gas does not matter  also H2ICE due to DI and NOx
         
-    otherwise % All variants with gas engines. Type of gas does not matter
         m_engine = 0.4702 * Param.engine.M_max + 141.4; % [kg] Source: SA Jon Schmidt S. 34
         diesel_abgas = 0; % [kg] Weight of exhaust treatment incl. AdBlue. Source: Ramon Tengel
         gas_abgas = 118.57; % [kg] Weight of exhaust treatment incl. AdBlue. Source: Ramon Tengel
@@ -93,7 +94,7 @@ if ~isfield(Param, 'WPT')
 end
 
 switch Param.Fueltype
-    case{4, 5, 6, 7, 10, 11, 12, 13} % Hybrid & electric drivetrains
+    case{4, 5, 6, 7, 10, 11, 12, 13, 15, 17} % Hybrid & electric drivetrains
         m_LE = Param.em.P_max / 10.8; % Power electronics [7]
         
         if Param.WPT.Voltage % Inductive charging weight
@@ -135,17 +136,30 @@ switch Param.Fueltype
                 error('Please provide a valid battery type')
         end
         
+              
     otherwise % If the vehicle is neither hybrid nor electric
         m_Bat              = 0;
         m_EM               = 0;
         m_On_Board_Charger = 0;
         m_LE               = 0;
 end
+%% Weight for the Fuel Cell Stack
+if Param.Fueltype == 13
+    m_stack = Param.FuelCell.P_nom / 1.94;
+
+else
+    m_stack = 0;
+    
+end
+
+        
+        
+
 
 %% Output
 Param.vehicle.mass = Param.weights.m_Base + m_gearbox + m_retarder + m_engine + ...
     diesel_abgas + gas_abgas + m_tank + m_Bat + m_EM + m_On_Board_Charger...
-    + m_LE + m_kraftstoff  + Param.weights.m_Trailer; % [kg]
+    + m_LE + m_kraftstoff + m_stack + Param.weights.m_Trailer; % [kg]
 
 if ~Param.vehicle.payload
     Param.vehicle.payload = Param.weights.m_Max - Param.vehicle.mass; % [kg]
@@ -164,5 +178,5 @@ Param.weights.m_EM            =   m_EM;      % Electric machine
 Param.weights.m_PwrElectr     =   m_LE;      % Power Electronics
 Param.weights.m_Charger       =   m_On_Board_Charger;      % On-board charger
 Param.weights.m_Exhaust       =   gas_abgas + diesel_abgas; % Exhaust treatment
-
+Param.weights.m_Stack         =  m_stack;           % Fuel Cell Stack
 end

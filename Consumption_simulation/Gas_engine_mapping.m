@@ -21,7 +21,7 @@ function [engine] = Gas_engine_mapping( Motormoment, Fueltype, n_lo, n_pref )
 % ------------
 % Output:   - engine:      struct array containing the ICE engine variables
 % ------------
-load('Kennfeld_Gas_Tschochner.mat'); % loads the characteristics of the original engine
+load('engineMap_Gas_Tschochner.mat'); % loads the characteristics of the original engine
 
 engine.number = 3;
 engine.M_max_original = 1120; %[Nm]

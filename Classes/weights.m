@@ -35,7 +35,7 @@ classdef weights
         m_EM            =   0;      % Electrical machine
         m_PwrElectr     =   0;      % Power Electronics
         m_Charger       =   0;      % Onboard charger
-        
+        m_Stack         =   0;      % FuelCell Stack
         % Fuel volume and weight
         v_diesel        =   0;      % Diesel in l
         v_LNG           =   0;      % LNG in l
@@ -60,7 +60,7 @@ classdef weights
     methods
         % class constructor
         % Takes Param as input and assigns parameters to class propertie
-        function obj = weights(Param, init, Vehicle)
+        function obj = weights(Param, init)
             if init
                 % Check if field exists, Standard is set as default
                 if isfield(Param.vehicle, 'long_truck') && Param.vehicle.long_truck
@@ -89,7 +89,7 @@ classdef weights
             m_Total = obj.m_Engine + obj.m_Gearbox + obj.m_Retarder...
                 + obj.m_Battery + obj.m_EM + obj.m_PwrElectr + ...
                 obj.m_Charger + obj.m_Exhaust + obj.m_Fuel + ...
-                obj.m_tank_system + obj.m_Base;
+                obj.m_tank_system + obj.m_Base + obj.m_Stack;
         end
         % When Payload = 0 in the simulation then max payload is assumed
         function    max_Payload = get.max_Payload(obj)

@@ -95,7 +95,7 @@ function [ Results, Param ] = VSim_evaluation(Results, Param, Run, Cycle)
                         Param.VSim.energyTotal     = Param.VSim.energyTotal_Bat + Param.VSim.energyTotal_WPT;
                     end
 
-                    Param.VSim.Consumption_kWh      = Param.VSim.bDiesel*9.97 + Param.VSim.energyTotal; %[Bun14] und [Sta12]
+                    Param.VSim.Consumption_kWh      = Param.VSim.bDiesel*(Param.engine.fuel.LHV/3.6) + Param.VSim.energyTotal; %[Bun14] und [Sta12]
                     Param.vehicleProperties.CO2_EM_ak =((Results.OUT_summary.signals(7).values(end))*Param.engine.fuel.co2_per_litre*1000/(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/1000))/(Param.vehicle.payload/1000);       %Theisen 05.04.2016
 
                     % Transfer to TCO class (Wolff 12.11.16)
@@ -104,6 +104,7 @@ function [ Results, Param ] = VSim_evaluation(Results, Param, Run, Cycle)
                     Param.TCO.LNG_consumption        = Param.VSim.bGas;
                     Param.TCO.energyTotal       = Param.VSim.energyTotal;
                     Param.TCO.Hydrogen_consumption = 0;
+                    Param.TCO.rangeElectric = inf;
 
                     %Output in Command Window
                     if Param.VSim.Opt == false
@@ -159,10 +160,10 @@ function [ Results, Param ] = VSim_evaluation(Results, Param, Run, Cycle)
                         fprintf('Acceleration from 60 to 80 km/h:  %2.4f seconds \n', t_60_80);  %Output acceleration in seconds
                         
                         fprintf(' \n');
-%                         fprintf('Acquisition cost:  %2.4f EUR\n', Param.acquisitionCosts.KA_ZM );  %Output acquisition cost in €
+%                         fprintf('Acquisition cost:  %2.4f EUR\n', Param.acquisitionCosts.KA_ZM );  %Output acquisition cost in ï¿½
                     end
 
-                case {8,9,10,11} %Dual-Fuel & Dual Fuel Hybrid
+                case {8,9,10,11,16,17} %Dual-Fuel & Dual Fuel Hybrid
                     %Calculations in advance
                     Results.verbrauch_d = Results.OUT_summary.signals(6).values(length(Results.OUT_summary.signals(6).values));    %Diesel consumption at the end of the simulation
                     Results.verbrauch_lng = Results.OUT_summary.signals(8).values(length(Results.OUT_summary.signals(8).values));    %LNG consumption at the end of the simulation
@@ -190,6 +191,13 @@ function [ Results, Param ] = VSim_evaluation(Results, Param, Run, Cycle)
                             % Transfer to TCO class (Wolff 12.11.16)
                             Param.TCO.CNG_consumption = Param.VSim.bGas;
                             Param.TCO.LNG_consumption = 0;
+                            
+                        case 'H2'
+                            Param.VSim.Consumption_kWh=Param.VSim.bDiesel*9.97+Param.VSim.bGas*33.33 +Param.VSim.energyTotal_Bat; %[Sta12]
+                            % Transfer to TCO class (Wolff 12.11.16)
+                            Param.TCO.CNG_consumption = 0;
+                            Param.TCO.LNG_consumption = 0;
+                            Param.TCO.Hydrogen_consumption = Param.VSim.bGas;
                     end
 
                     Param.vehicleProperties.CO2_EM_ak=(((Results.OUT_summary.signals(7).values(end)-Results.V)*Param.engine.fuel.co2_per_litre_diesel*1000/(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/1000))+((Results.OUT_summary.signals(9).values(end)-Results.M)*Param.engine.fuel.co2_per_kg_gas*1000/(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/1000)))/(Param.vehicle.payload/1000);
@@ -197,7 +205,7 @@ function [ Results, Param ] = VSim_evaluation(Results, Param, Run, Cycle)
                     % Transfer to TCO class (Wolff 12.11.16)
                     Param.TCO.bDiesel = Param.VSim.bDiesel;
                     Param.TCO.energyTotal = Param.VSim.energyTotal;
-                    Param.TCO.Hydrogen_consumption = 0;
+                    Param.TCO.rangeElectric = inf;
 
                     %Output in command window
                     if Param.VSim.Opt == false
@@ -212,7 +220,8 @@ function [ Results, Param ] = VSim_evaluation(Results, Param, Run, Cycle)
                         fprintf([Param.engine.fuel.Gasart, '\n']);
                         
                         fprintf(' \n');
-                        fprintf('Energy:                %2.4f kWh/100km \n' , Param.VSim.Consumption_kWh);  %Output consumption in kWh/100km
+                        fprintf('Battery consumption:    %2.4f kWh \n',-Results.delta_E); %Output battery capacity consumption in kWh
+                        fprintf('Energy:                %2.4f kWh/100km \n', Param.VSim.Consumption_kWh);  %Output consumption in kWh/100km
                         fprintf('Normalized energy:     %2.4f kWh/100tkm \n' , Param.VSim.Consumption_kWh/(Param.vehicle.payload/1000));  %Output consumption in kWh/100tkm
                         
                         fprintf(' \n');
@@ -240,7 +249,7 @@ function [ Results, Param ] = VSim_evaluation(Results, Param, Run, Cycle)
                         fprintf('Acceleration from 60 to 80 km/h:   %2.4f seconds \n', t_60_80);  %Output acceleration in seconds
                         
                         fprintf(' \n');
-%                         fprintf('Acquisition cost: %2.4f EUR\n', Param.acquisitionCosts.KA_ZM );  %Output costs in €
+%                         fprintf('Acquisition cost: %2.4f EUR\n', Param.acquisitionCosts.KA_ZM );  %Output costs in ï¿½
                     end
                     
                 case {2,3,5,6} %Gas & Gas Hybrid
@@ -276,6 +285,7 @@ function [ Results, Param ] = VSim_evaluation(Results, Param, Run, Cycle)
                     Param.TCO.energyTotal = Param.VSim.energyTotal;
                     Param.TCO.Hydrogen_consumption = 0;
                     Param.vehicleProperties.CO2_EM_ak = (Results.OUT_summary.signals(6).values(end))/(Param.vehicle.payload/1000);
+                    Param.TCO.rangeElectric = 0;
 
                     %Output in Command Window
                     if Param.VSim.Opt == false
@@ -305,10 +315,10 @@ function [ Results, Param ] = VSim_evaluation(Results, Param, Run, Cycle)
                         [t_60_80] = Acceleration(Param.VSim);
                         fprintf('Acceleration from 60 to 80 km/h: %2.4f seconds \n', t_60_80);  %Output acceleration in seconds
                         fprintf(' \n');
-%                         fprintf('Acquisition cost: %2.4f EUR\n', Param.acquisitionCosts.KA_ZM );  %Output costs in €
+%                         fprintf('Acquisition cost: %2.4f EUR\n', Param.acquisitionCosts.KA_ZM );  %Output costs in ï¿½
                     end
                     
-                case {7, 12} %Electric truck, Jon Schmidt, 30.11.2015
+                case {7} %Electric truck, Jon Schmidt, 30.11.2015
                     Results.duration = max(Results.OUT_summary.time)/60;    %Driving time in minutes
                     Results.distance = max(Results.OUT_summary.signals(2).values)/1000; %Distance in kilometers
                     Results.delta_E = (Results.OUT_Bat.signals(1).values(length(Results.OUT_Bat.signals(1).values))-Param.Bat.SOC_start)*Param.Bat.Voltage*Param.Bat.Useable_capacity/1000;   %Energy difference in the battery between the beginning and end of the driving cycle in kWh
@@ -338,6 +348,7 @@ function [ Results, Param ] = VSim_evaluation(Results, Param, Run, Cycle)
                     Param.TCO.LNG_consumption = Param.VSim.bGas;
                     Param.TCO.energyTotal = Param.VSim.energyTotal;
                     Param.TCO.Hydrogen_consumption = 0;
+                    Param.TCO.rangeElectric = (Param.Bat.Voltage * Param.Bat.Useable_capacity/1000) / (Param.VSim.Consumption_kWh/100);
 
                     if Param.VSim.Opt == false
                         %Output in Command Window
@@ -374,22 +385,97 @@ function [ Results, Param ] = VSim_evaluation(Results, Param, Run, Cycle)
                         [t_60_80] = Acceleration(Param.VSim);
                         fprintf('Acceleration from 60 to 80 km/h: %2.4f seconds \n', t_60_80);  %Output acceleration in seconds
                         fprintf(' \n');
-%                         fprintf('Acquisition cost: %2.4f  EUR\n', Param.acquisitionCosts.KA_ZM );  %Output costs in €
+%                         fprintf('Acquisition cost: %2.4f  EUR\n', Param.acquisitionCosts.KA_ZM );  %Output costs in ï¿½
                     end
-
+                    
+                case {12} %Electric truck, Jon Schmidt, 30.11.2015
+                Results.duration = max(Results.OUT_summary.time)/60;    %Driving time in minutes
+                Results.distance = max(Results.OUT_summary.signals(2).values)/1000; %Distance in kilometers               
+                Results.delta_E = (Results.OUT_Bat.signals(1).values(length(Results.OUT_Bat.signals(1).values))-Param.Bat.SOC_start)*Param.Bat.Voltage*Param.Bat.Useable_capacity/1000; %consumed energy from battery in kWh
+                
+                %Transfer of results to commercial vehicle design
+                Param.VSim.bDiesel = 0;
+                Param.VSim.bGas = 0;
+                Param.VSim.energyTotal = -Results.delta_E/(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/100000); % in kWh/100km
+                
+                if Param.Fueltype == 12 
+                    Results.delta_OC = Results.OUT_OC.signals(1).values(end); % Consumed energy from overhead line in kWh
+                    Param.VSim.energyTotal_OC = -Results.delta_OC /(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/100000); % Consumed energy from overhead line in kWh/100km
+                    Param.VSim.energyTotal_Bat = -Results.delta_E /(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/100000); % Consumed energy from battery in kWh/100km
+                    Param.VSim.energyTotal = Param.VSim.energyTotal_Bat + Param.VSim.energyTotal_OC;% Total consumed energy in kWh/100km
+                else
+                    Results.delta_OC = 0;
+                    Param.VSim.energyTotal_Bat = -Results.delta_E/(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/100000); % in kWh/100km
+                    Param.VSim.energyTotal_OC = 0;
+                    Param.VSim.energyTotal = Param.VSim.energyTotal_Bat + Param.VSim.energyTotal_OC;
+                end
+                Param.VSim.Consumption_kWh = Param.VSim.energyTotal;
+                Param.vehicleProperties.CO2_EM_ak = (-Results.delta_E*Param.em.fuel.co2_per_kwh/(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/1000))/(Param.vehicle.payload/1000);
+                
+                % Transfer to TCO class (Wolff 12.11.16)
+                Param.TCO.bDiesel = Param.VSim.bDiesel;
+                Param.TCO.CNG_consumption = Param.VSim.bGas;
+                Param.TCO.LNG_consumption = Param.VSim.bGas;
+                Param.TCO.energyTotal = Param.VSim.energyTotal;
+                Param.TCO.Hydrogen_consumption = 0;
+                Param.TCO.rangeElectric = inf;
+                
+             %% O-BEV (Fueltype = 12) Verbrauchssimulation Evaluation Output, changed by Aonan Shen, on 01.05.2020                                 
+                if Param.VSim.Opt == false
+                    %Output in Command Window 
+                    fprintf('Total Energy:             %2.4f kWh \n',-Results.delta_E-Results.delta_OC);% Total energy consumption of O-BEV in kWh
+                    
+                    if Param.Fueltype == 12
+                        fprintf('               of which   %2.4f kWh OC \n', -Results.delta_OC);% Energy consumption from overhead line in kWh
+                        fprintf('               of which   %2.4f kWh Bat \n', -Results.delta_E);
+                        
+                    else
+                        fprintf('\n');
+                    end
+                    fprintf('Energy per 100km:         %2.4f kWh/100km', Param.VSim.Consumption_kWh); %Output consumption of battey capacity in kWh/100km
+                    if Param.Fueltype == 12
+                        fprintf('               of which   %2.4f kWh/100km OC\n', Param.VSim.energyTotal_OC);
+                    else
+                        fprintf('\n');
+                    end
+                    fprintf('Normalized energy:               %2.4f kWh/100tkm', (-Results.delta_E - Results.delta_OC)/(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/100000)/(Param.vehicle.payload/1000));  %Output consumption of battey capacity in kWh/100tkm (pro 100km und pro Tonne Ladungsmasse)
+                    if Param.Fueltype == 12
+                        fprintf(' of which %2.4f kWh/100tkm OC\n', -Results.delta_OC/(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/100000)/(Param.vehicle.payload/1000));  %Output consumption of OC in kWh/100tkm (per 100km and per tonne of cargo)
+                    else
+                        fprintf('\n');
+                    end
+                    
+                    fprintf(' \n');
+                    fprintf('Equivalent emissions:            %2.4f gCO2/km \n', -Results.delta_E*Param.em.fuel.co2_per_kwh/(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/1000));  %Output CO2 emissions in gCO2/km
+                    fprintf('Normalized equivalent emissions: %2.4f gCO2/tkm \n', (-Results.delta_E*Param.em.fuel.co2_per_kwh/(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/1000))/(Param.vehicle.payload/1000));  %Output CO2 emissions in gCO2/tkm
+                    
+                    fprintf(' \n');
+                    fprintf('Distance:                        %2.4f km \n', Results.distance); %Distance in kilometers
+                    fprintf('Driving time:                    %2.4f  minutes \n',Results.duration);  %Output driving time in minutes
+                    fprintf('Average speed:                   %2.4f km/h\n',0.001*Results.OUT_summary.signals(2).values(end)/(Results.OUT_summary.time(end)/3600))  %Output average speed in km/h
+                    
+                    [t_0_80] = Acceleration_readout(Param.VSim);
+                    fprintf('Acceleration from 0 to 80 km/h:  %2.4f seconds \n', t_0_80);  %Output acceleration in seconds
+                    [t_60_80] = Acceleration(Param.VSim);
+                    fprintf('Acceleration from 60 to 80 km/h: %2.4f seconds \n', t_60_80);  %Output acceleration in seconds
+                    fprintf(' \n');
+                    % fprintf('Acquisition cost: %2.4f  EUR\n', Param.acquisitionCosts.KA_ZM );  %Output costs in ?
+                end
+                
+    
                 case {13} % Fuel cell
                     Results.duration = max(Results.OUT_summary.time)/60;    %Driving time in minutes
                     Results.distance = max(Results.OUT_summary.signals(2).values)/1000; %Distance in kilometers
                     %Ergebnis.delta_E = (Ergebnis.OUT_Bat.signals(1).values(length(Ergebnis.OUT_Bat.signals(1).values))-Param.Bat.SOC_start)*Param.Bat.Voltage*Param.Bat.Useable_capacity/1000;   %Energieunterschied in der Batterie zw. Zyklusanfang und -ende in kWh
-                    Results.delta_E = 0;
+                    Results.delta_E = -(Param.Bat.SOC_start + Param.Bat.SOC_start - Results.OUT_Bat.signals(1).values(length(Results.OUT_Bat.signals(1).values)))*Param.Bat.Voltage*Param.Bat.Useable_capacity/1000;   %Energy difference in the battery between the beginning and end of the driving cycle in kWh
 
                     %Transfer of results to commercial vehicle design 
                     Param.VSim.bDiesel = 0;
                     Param.VSim.bGas = 0;
-                    Param.VSim.energyTotal = 0;
-                    Param.VSim.energyTotal_Bat = 0;
-                    Param.VSim.Hydrogen_consumption = Results.OUT_FC.signals(2).values(end); % H2 consumption in kg/100km
-                    Param.VSim.Consumption_kWh = Results.OUT_FC.signals(2).values(end) * 33.33;  % Consumption in kWh/100km
+                    Param.VSim.energyTotal_Bat =  -Results.delta_E/(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/100000); % in kWh/100km
+                    Param.VSim.energyTotal = 0;%Param.VSim.energyTotal_Bat;
+                    Param.VSim.Hydrogen_consumption = Results.OUT_FC.signals(2).values(end) + (Param.VSim.energyTotal_Bat/(Param.FuelCell.Eta/100*33.33)); % H2 consumption in kg/100km
+                    Param.VSim.Consumption_kWh = Results.OUT_FC.signals(2).values(end) * 33.33 + (Param.VSim.energyTotal_Bat/(Param.FuelCell.Eta/100));  % Consumption in kWh/100km
                     %Param.vehicleProperties.CO2_EM_ak = (-Ergebnis.delta_E*Param.em.fuel.co2_per_kwh/(Ergebnis.OUT_summary.signals(2).values(length(Ergebnis.OUT_summary.signals(2).values))/1000))/(Param.vehicle.payload/1000);
 
                     % Transfer to TCO class (Wolff 12.11.16)
@@ -398,10 +484,12 @@ function [ Results, Param ] = VSim_evaluation(Results, Param, Run, Cycle)
                     Param.TCO.LNG_consumption = Param.VSim.bGas;
                     Param.TCO.energyTotal = Param.VSim.energyTotal;
                     Param.TCO.Hydrogen_consumption = Param.VSim.Hydrogen_consumption;
+                    Param.TCO.rangeElectric = inf;
+
 
                     if Param.VSim.Opt == false
                         %Output in Command Window
-                        fprintf('Hydrogen consumption:            %2.4f kg H2 \n', Results.OUT_FC.signals(1).values(end));  %Output natural gas consumption in kg
+                        fprintf('Hydrogen consumption:            %2.4f kg H2 \n', Results.OUT_FC.signals(1).values(end) + (-Results.delta_E/(Param.FuelCell.Eta*33.33)));  %Output natural gas consumption in kg
                         fprintf('Hydrogen economy:                %2.4f kg/100km \n',Param.VSim.Hydrogen_consumption);  %Output natural gas consumption in kg/100km
                         fprintf('Normalized hydrogen consumption: %2.4f kg/100tkm \n', Param.VSim.Hydrogen_consumption/(Param.vehicle.payload/1000));  %Output natural gas consumption in kg/100tkm
                         
@@ -418,8 +506,98 @@ function [ Results, Param ] = VSim_evaluation(Results, Param, Run, Cycle)
                         [t_60_80] = Acceleration(Param.VSim);
                         fprintf('Acceleration from 60 to 80 km/h: %2.4f seconds \n', t_60_80);  %Output acceleration in seconds
                         fprintf(' \n');
-%                         fprintf('Acquisition cost: %2.4f  EUR\n', Param.acquisitionCosts.KA_ZM );  %Output costs in €
+%                         fprintf('Acquisition cost: %2.4f  EUR\n', Param.acquisitionCosts.KA_ZM );  %Output costs in ï¿½
                     end
+                    
+                case {14,15} %Hydrogen Combustion(hybrid)
+                    %Calculations in advance
+                    Results.verbrauch = Results.OUT_summary.signals(6).values(length(Results.OUT_summary.signals(6).values));    %Fuel consumption at the end of the simulation
+                    Results.duration  = max(Results.OUT_summary.time)/60;    %Driving time in minutes
+                    Results.distance  = max(Results.OUT_summary.signals(2).values)/1000; %Distance in kilometers
+                    Results.delta_E   = (Results.OUT_Bat.signals(1).values(length(Results.OUT_Bat.signals(1).values)) - Param.Bat.SOC_start)*Param.Bat.Voltage*Param.Bat.Useable_capacity * Param.Hybrid_Truck/1000;   %Energy difference in the battery between the beginning and end of the cycle
+                    Results.V         = Results.delta_E*188/0.95/0.95/0.95/830;     %The energy difference corresponding to fuel volume
+
+                    %Transfer of results to commercial vehicle design
+                    Param.VSim.bDiesel = 0;
+                    Param.VSim.bGas = 0;
+                    Param.VSim.energyTotal_Bat =  -Results.delta_E/(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/100000); % in kWh/100km
+                    Param.VSim.energyTotal = Param.VSim.energyTotal_Bat;
+                    Param.VSim.Hydrogen_consumption = (Results.OUT_summary.signals(7).values(end))/(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/100000); %in kg/100km
+                    %Param.VSim.energyTotal = 0; % The energy difference in hybrids is included in other fuel consumption, Jon Schmidt, 22.03.2016
+
+                    if Param.WPT.Voltage
+                        Results.delta_WPT = Results.OUT_WPT.signals(1).values(end); % Consumed energy by charging in kWh
+                        Param.VSim.energyTotal_Bat = -Results.delta_E * Param.Hybrid_Truck/(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/100000); % in kWh/100km
+                        Param.VSim.energyTotal_WPT = -Results.delta_WPT /(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/100000);  % in kWh/100km
+                        Param.VSim.energyTotal     = Param.VSim.energyTotal_Bat + Param.VSim.energyTotal_WPT;
+                        
+                    else
+                        Results.delta_WPT = 0;
+                        Param.VSim.energyTotal_Bat = -Results.delta_E * Param.Hybrid_Truck/(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/100000); % in kWh/100km
+                        Param.VSim.energyTotal_WPT = 0;
+                        Param.VSim.energyTotal     = Param.VSim.energyTotal_Bat + Param.VSim.energyTotal_WPT;
+                    end
+                    
+                    Param.VSim.Consumption_kWh      = Param.VSim.Hydrogen_consumption*(Param.engine.fuel.LHV/3.6) + Param.VSim.energyTotal; %[Bun14] und [Sta12]
+                    Param.vehicleProperties.CO2_EM_ak =0;       %Theisen 05.04.2016
+
+                    % Transfer to TCO class (Wolff 12.11.16)
+                    Param.TCO.bDiesel                = Param.VSim.bDiesel;
+                    Param.TCO.CNG_consumption        = Param.VSim.bGas;
+                    Param.TCO.LNG_consumption        = Param.VSim.bGas;
+                    Param.TCO.energyTotal            = Param.VSim.energyTotal;
+                    Param.TCO.Hydrogen_consumption   = Param.VSim.Hydrogen_consumption;
+                    Param.TCO.rangeElectric = inf;
+
+
+                    %Output in Command Window
+                    if Param.VSim.Opt == false
+                        fprintf('Fuel consumption:      %2.4f kg Hydrogen \n',Results.OUT_summary.signals(7).values(end));  %Output fuel consumption in liters
+                        fprintf('Fuel economy:          %2.4f kg/100km Hydrogen \n',Param.VSim.Hydrogen_consumption);  %Output fuel consumption in l/100km
+                        fprintf('Normalized economy:    %2.4f kg/100tkm \n', (Results.OUT_summary.signals(7).values(end))/(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/100000)/(Param.vehicle.payload/1000));  %Output fuel consumption in l/100tkm
+                        fprintf(' \n');
+                        fprintf('Energy consumption:    %2.4f kWh,        of which %2.4f kWh battery', Results.OUT_summary.signals(7).values(end)*33.33, -Results.delta_E); %Output battery capacity consumption in kWh
+
+                        fprintf('\n');
+                        fprintf('Energy:                %2.4f kWh/100km,  of which %2.4f kWh/100km battery', Param.VSim.Consumption_kWh , Param.VSim.energyTotal_Bat); %Output battery capacity consumption in kWh/100km
+                        fprintf('\n');
+                        fprintf('Normalized energy:     %2.4f kWh/100tkm,  of which %2.4f kWh/100tkm battery', ((Param.VSim.Consumption_kWh)/(Param.vehicle.payload/1000)), Param.VSim.energyTotal_Bat/(Param.vehicle.payload/1000));  %Output battery capacity consumption in kWh/100tkm (per 100km and per tonn of cargo)
+                        if Param.WPT.Voltage
+                            fprintf(' and %2.4f kWh/100tkm WPT\n', Param.VSim.energyTotal_WPT/(Param.vehicle.payload/1000));  %Output consumption of WPT in kWh/100tkm (per 100km and per tonn of cargo)
+                        else
+                            fprintf('\n');
+                        end
+                        
+                        fprintf(' \n');
+                        fprintf('Equivalent Emission:              %2.4f gCO2/km,    of which %2.4f gCO2/km battery', (Results.OUT_summary.signals(7).values(end)*Param.engine.fuel.co2_per_litre*1000 + (-Results.delta_WPT -Results.delta_E) * Param.em.fuel.co2_per_kwh) /(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/1000), (-Results.delta_E * Param.em.fuel.co2_per_kwh) /(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/1000));  %Output fuel emission in gCO2/km
+                        if Param.WPT.Voltage
+                            fprintf(' and %2.4f gCO2/km WPT\n', -Results.delta_WPT * Param.em.fuel.co2_per_kwh/(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/1000));
+                        else
+                            fprintf('\n');
+                        end
+
+                        fprintf('Normalized equivalent emission:   %2.4f gCO2/tkm,    of which %2.4f gCO2/tkm battery', (Results.OUT_summary.signals(7).values(end)*Param.engine.fuel.co2_per_litre*1000 + (-Results.delta_WPT -Results.delta_E) * Param.em.fuel.co2_per_kwh) /(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/1000)/(Param.vehicle.payload/1000), (-Results.delta_E * Param.em.fuel.co2_per_kwh) /(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/1000)/(Param.vehicle.payload/1000));  %Ausgabe Fueltypeverbrauch in gCO2/tkm
+                        if Param.WPT.Voltage
+                            fprintf(' and %2.4f gCO2/tkm WPT\n', -Results.delta_WPT * Param.em.fuel.co2_per_kwh/(Results.OUT_summary.signals(2).values(length(Results.OUT_summary.signals(2).values))/1000)/(Param.vehicle.payload/1000));  %Ausgabe Verbrauch WPT in kWh/100tkm (pro 100km und pro Tonne Ladungsmasse)
+                        else
+                            fprintf('\n');
+                        end
+
+                        fprintf(' \n');
+                        fprintf('Distance:                         %2.4f km \n', Results.distance); %Distance in kilometers
+                        fprintf('Duration:                         %2.4f minutes \n',Results.duration);  %Output driving time in minutes
+                        fprintf('Average speed:                    %2.4f km/h \n',0.001*Results.OUT_summary.signals(2).values(end)/(Results.OUT_summary.time(end)/3600))  %Output average speed in km/h
+
+                        [t_0_80] = Acceleration_readout(Param.VSim);
+                        fprintf('Acceleration from 0 to 80 km/h:   %2.4f seconds \n', t_0_80);  %Output acceleration in seconds
+                        [t_60_80] = Acceleration(Param.VSim);
+                        fprintf('Acceleration from 60 to 80 km/h:  %2.4f seconds \n', t_60_80);  %Output acceleration in seconds
+                        
+                        fprintf(' \n');
+%                         fprintf('Acquisition cost:  %2.4f EUR\n', Param.acquisitionCosts.KA_ZM );  %Output acquisition cost in ï¿½
+                    end
+
+                
             end
 
             %% Calculate transmission characteristics
@@ -428,7 +606,7 @@ function [ Results, Param ] = VSim_evaluation(Results, Param, Run, Cycle)
             %% Update TCO classes
             Param.TCO.Driving_distance = Results.distance;
             Param.TCO.Average_speed = 0.001*Results.OUT_summary.signals(2).values(end)/(Results.OUT_summary.time(end)/3600);
-            helpStruct = load('costStruct_2030_Steuerbefreit.mat');
+            helpStruct = load('costStruct_2020_exclTax.mat');
             costStruct = helpStruct.costStruct;
             Param = calcPrice(Param, costStruct);
 
@@ -438,24 +616,29 @@ function [ Results, Param ] = VSim_evaluation(Results, Param, Run, Cycle)
             else
                 switch Param.Fueltype
                     case {7, 12, 13} % Battery life of the electric truck
-                        Param.TCO.Lebensdauer_Batteriepack = (Param.Bat.Charge_cycles * Param.Bat.Voltage * Param.Bat.Useable_capacity/1000)/ (Results.Elektro_LKW.signals(12).values(end)*Param.TCO.Annual_mileage(1)); % Battery life in years
-    %                     Param.TCO.Verschleissbatteriepack = (Param.Bat.Charge_cycles * Param.Bat.Voltage * Param.Bat.Useable_capacity/1000)/ (Ergebnis.Elektro_LKW.signals(12).values(end)); % Wear per km, in TCO class to €/km
+                       Param.TCO.Lebensdauer_Batteriepack = (Param.Bat.Charge_cycles * Param.Bat.Voltage * Param.Bat.Useable_capacity/(1000*Param.Bat.Useable_range))/ (Results.Elektro_LKW.signals(12).values(end)*Param.TCO.Annual_mileage(1)); % Battery life in years
+                        %Lifecycle costs and charging requirements of electric buses with different charging methods, Journal of Cleaner Production (2017), doi: 10.1016/j.jclepro.2017.10.066
+    %                     Param.TCO.Verschleissbatteriepack = (Param.Bat.Charge_cycles * Param.Bat.Voltage * Param.Bat.Useable_capacity/1000)/ (Ergebnis.Elektro_LKW.signals(12).values(end)); % Wear per km, in TCO class to ï¿½/km
     %                     Param.Bat.SOH = interp1([0 Param.TCO.Lebensdauerbatteriepack], [100 80], Param.TCO.Operating_life(1), 'linear', 'extrap');
+                        Param.TCO.residualValueBattery(1,1) = (1+floor(Param.TCO.Operating_life(1)/Param.TCO.Lebensdauer_Batteriepack)) * Param.acquisitionCosts.Bat_kWh .* 25; % S. Rohr, S. Wagner, M. Baumann, S. Mï¿½ller, und M. Lienkamp, ï¿½A techno-economic analysis of end of life value chains for lithium-ion batteries from electric vehicles,ï¿½ in 2017 Twelfth International Conference on Ecological Vehicles and Renewable Energies (EVER), 2017, S. 1ï¿½14.
+
 
                         if ~Param.VSim.Opt
     %                         fprintf('Verschleissdauer Batteriepack in:  %2.4f  Jahren \n', Param.TCO.Lebensdauerbatteriepack);
-    %                         fprintf('benötigte Batteriepacks in:  %2.4f  Stück \n', ((Param.TCO.Nutzungsdauer(1) / Param.TCO.Lebensdauerbatteriepack)) );
-                            fprintf('Pure electric Range: %.2f km \n', (Param.Bat.Voltage * Param.Bat.Useable_capacity/1000) / (Param.VSim.Consumption_kWh/100));
+    %                         fprintf('benï¿½tigte Batteriepacks in:  %2.4f  Stï¿½ck \n', ((Param.TCO.Nutzungsdauer(1) / Param.TCO.Lebensdauerbatteriepack)) );
+                           % fprintf('Pure electric Range: %.2f km \n', Param.TCO.rangeElectric);
                         end
 
                     otherwise
-                        Param.TCO.Lebensdauer_Batteriepack = (Param.Bat.Charge_cycles * Param.Bat.Voltage * Param.Bat.Useable_capacity/1000)/ (Results.OUT_Bat.signals(5).values(end)*Param.TCO.Annual_mileage(1));
-    %                     Param.TCO.Verschleissbatteriepack = (Param.Bat.Charge_cycles * Param.Bat.Voltage * Param.Bat.Useable_capacity/1000)/ (Ergebnis.OUT_Bat.signals(5).values(end)); % Wear per km, in TCO class to €/km
+                        Param.TCO.Lebensdauer_Batteriepack = (Param.Bat.Charge_cycles * Param.Bat.Voltage * Param.Bat.Useable_capacity/1000*Param.Bat.Useable_range)/ (Results.OUT_Bat.signals(5).values(end)*Param.TCO.Annual_mileage(1));
+                        Param.TCO.residualValueBattery(1,1) = (1+floor(Param.TCO.Operating_life(1)/Param.TCO.Lebensdauer_Batteriepack)) * Param.acquisitionCosts.Bat_kWh .* 25; % S. Rohr, S. Wagner, M. Baumann, S. Mï¿½ller, und M. Lienkamp, ï¿½A techno-economic analysis of end of life value chains for lithium-ion batteries from electric vehicles,ï¿½ in 2017 Twelfth International Conference on Ecological Vehicles and Renewable Energies (EVER), 2017, S. 1ï¿½14.
+
+                        %  Param.TCO.Verschleissbatteriepack = (Param.Bat.Charge_cycles * Param.Bat.Voltage * Param.Bat.Useable_capacity/1000)/ (Ergebnis.OUT_Bat.signals(5).values(end)); % Wear per km, in TCO class to ï¿½/km
                          %Param.Bat.SOH = interp1([0 Param.TCO.Lebensdauerbatteriepack], [100 80], Param.TCO.Operating_life(1), 'linear', 'extrap');
                         if ~Param.VSim.Opt
     %                         fprintf('Verschleissdauer Batteriepack in:  %2.4f  Jahren \n', Param.TCO.Lebensdauerbatteriepack);
-    %                         fprintf('benötigte Batteriepacks in:  %2.4f  Stück \n', ((Param.TCO.Nutzungsdauer(1) / Param.TCO.Lebensdauerbatteriepack)) );
-                            fprintf('Pure electric Range: %.2f km \n', ((Param.Bat.Voltage * Param.Bat.Useable_capacity) / Param.VSim.Consumption_kWh * 100 / 1000));
+    %                         fprintf('benï¿½tigte Batteriepacks in:  %2.4f  Stï¿½ck \n', ((Param.TCO.Nutzungsdauer(1) / Param.TCO.Lebensdauerbatteriepack)) );
+                           % fprintf('Pure electric Range: %.2f km \n', ((Param.Bat.Voltage * Param.Bat.Useable_capacity) / Param.VSim.Consumption_kWh * 100 / 1000));
                         end
                 end
             end
@@ -493,7 +676,7 @@ function [ Results, Param ] = VSim_evaluation(Results, Param, Run, Cycle)
                 if Param.Fueltype == 1 || Param.Fueltype == 4
 
                     %-----Diesel engine mapping-----
-                    figure('units','normalized','outerposition',[0 0 1 1],'Name','3');
+                    figure('units','normalized','outerposition',[0 0 1 1],'Name','Engine');
                     subplot(1,2,1);
                     hold on;
                     clabel (contour (Param.engine.bsfc.speed, Param.engine.bsfc.trq, Param.engine.bsfc.be, 'LevelList',[160 170 180 187 188 189 190 191 195 200 210 220 230 250 300 400 500 700]));
@@ -518,7 +701,7 @@ function [ Results, Param ] = VSim_evaluation(Results, Param, Run, Cycle)
                 if Param.Fueltype == 2 || Param.Fueltype == 5 || Param.Fueltype == 3 || Param.Fueltype == 6
 
                     %-----Gas engine mapping-----
-                    figure('units','normalized','outerposition',[0 0 1 1],'Name','3');
+                    figure('units','normalized','outerposition',[0 0 1 1],'Name','Engine');
                     subplot(1,2,1);
                     a = [0.2 0.25 0.3 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.395 0.4]; %Vector of efficiency lines to display
                     hold on;
@@ -544,9 +727,58 @@ function [ Results, Param ] = VSim_evaluation(Results, Param, Run, Cycle)
                 if Param.Fueltype == 8 || Param.Fueltype == 9 || Param.Fueltype == 10 || Param.Fueltype == 11
 
                     %-----Dual fuel engine mapping-----
-                    figure('units','normalized','outerposition',[0 0 1 1],'Name','3');
+                    figure('units','normalized','outerposition',[0 0 1 1],'Name','Engine');
                     subplot(1,2,1);
                     a = [0.2 0.22 0.25 0.3 0.35 0.36 0.37 0.38 0.39 0.4 0.41 0.42]; %Vector of efficiency lines to display
+                    hold on;
+                    clabel (contour (Param.engine.bsfc.speed, Param.engine.bsfc.trq, Param.engine.bsfc.be, a)) %Plot efficiency mapping
+                    plot (Param.engine.full_load.speed, Param.engine.full_load.trq, 'k', 'LineWidth', 2);
+                    plot (Param.engine.drag_torque.speed, Param.engine.drag_torque.trq, 'k', 'LineWidth', 2);
+                    plot ([Param.engine.speed_min Param.engine.speed_max], [0 0], 'k');
+                    plot (Param.engine.bsfc.speed, Param.engine.bsfc.M_be_min, 'r'); %Plot torque characteristics 
+                    ylim ([min(Param.engine.drag_torque.trq), Param.engine.M_max]);
+                    xlim ([Param.engine.speed_min, Param.engine.speed_max]);
+                    xlabel ('Speed [rpm]');
+                    ylabel ('Torque [Nm]');
+                    title ('Consumption map in g/kWh with torque curve and switching devices');
+
+                    % Switching devices
+                    plot ([Param.engine.shift_parameter.n2, Param.engine.shift_parameter.n2], [0, Param.engine.M_max], 'g');
+                    plot (Param.engine.bsfc.speed, Param.engine.M_max/(Param.engine.shift_parameter.n3-Param.engine.shift_parameter.n1)*(Param.engine.bsfc.speed-Param.engine.shift_parameter.n1), 'g');
+                    plot ([Param.engine.shift_parameter.n5, Param.engine.shift_parameter.n5], [0, Param.engine.M_max], 'g');
+                    plot (Param.engine.bsfc.speed, Param.engine.M_max/(Param.engine.shift_parameter.n6-Param.engine.shift_parameter.n2)*(Param.engine.bsfc.speed-Param.engine.shift_parameter.n2), 'g');
+                end
+                
+                if Param.Fueltype == 14 || Param.Fueltype == 15 %H2ICE
+
+                    %-----Hydrogen engine mapping-----
+                    figure('units','normalized','outerposition',[0 0 1 1],'Name','Engine');
+                    subplot(1,2,1);
+                    hold on;
+                    clabel (contour (Param.engine.bsfc.speed, Param.engine.bsfc.trq, Param.engine.bsfc.be, 'LevelList',[64 65 66,7 70 73,3 76,7 83,3 100 133,3 166,7 233,3]));
+                    plot (Param.engine.full_load.speed, Param.engine.full_load.trq, 'k', 'LineWidth', 2);
+                    plot (Param.engine.drag_torque.speed, Param.engine.drag_torque.trq, 'k', 'LineWidth', 2);
+                    plot ([Param.engine.speed_min Param.engine.speed_max], [0 0], 'k');
+                    plot (Param.engine.bsfc.speed, Param.engine.bsfc.M_be_min, 'r');
+                    ylim ([min(Param.engine.drag_torque.trq), Param.engine.M_max+300]);
+                    xlim ([Param.engine.speed_min, Param.engine.speed_max]);
+                    xlabel ('Speed [rpm]');
+                    ylabel ('Torque [Nm]');
+                    title ('Consumption map in g/kWh with torque curve and switching devices');
+
+                    % Switching devices
+                    plot ([Param.engine.shift_parameter.n2, Param.engine.shift_parameter.n2], [0, Param.engine.M_max], 'g');
+                    plot (Param.engine.bsfc.speed, Param.engine.M_max/(Param.engine.shift_parameter.n3-Param.engine.shift_parameter.n1)*(Param.engine.bsfc.speed-Param.engine.shift_parameter.n1), 'g');
+                    plot ([Param.engine.shift_parameter.n5, Param.engine.shift_parameter.n5], [0, Param.engine.M_max], 'g');
+                    plot (Param.engine.bsfc.speed, Param.engine.M_max/(Param.engine.shift_parameter.n6-Param.engine.shift_parameter.n2)*(Param.engine.bsfc.speed-Param.engine.shift_parameter.n2), 'g');
+                end
+                
+                if Param.Fueltype == 16 || Param.Fueltype == 17  % Dual-Fuel HICE
+
+                    %-----Dual fuel engine mapping-----
+                    figure('units','normalized','outerposition',[0 0 1 1],'Name','Engine');
+                    subplot(1,2,1);
+                    a = [0.2 0.22 0.25 0.3 0.35 0.36 0.37 0.38 0.39 0.4 0.41 0.42].*(44/42); %Vector of efficiency lines to display
                     hold on;
                     clabel (contour (Param.engine.bsfc.speed, Param.engine.bsfc.trq, Param.engine.bsfc.be, a)) %Plot efficiency mapping
                     plot (Param.engine.full_load.speed, Param.engine.full_load.trq, 'k', 'LineWidth', 2);
@@ -572,7 +804,7 @@ function [ Results, Param ] = VSim_evaluation(Results, Param, Run, Cycle)
                     % -----ICE Operating points-----
                     Anzahl_Lastpunkte = length(Results.OUT_engine.signals(1).values);
 
-                    Raster.Drehzahl = 800:100:2000;
+                    Raster.Drehzahl = Param.engine.speed_min:100:Param.engine.speed_max;
                     Raster.Drehmoment = fliplr(Param.engine.M_max:-100:min(Param.engine.drag_torque.trq));
                     Raster.Drehmoment(1) = min(Param.engine.drag_torque.trq);
 
@@ -606,7 +838,7 @@ function [ Results, Param ] = VSim_evaluation(Results, Param, Run, Cycle)
                     %set(gca, 'YTick', 1:1:length(Raster.Drehmoment)-1);
                     set(gca, 'YTick', 1:2:length(Raster.Drehmoment)-1);
                     %set(gca, 'XTickLabel', num2str(Raster.Drehzahl'+50));
-                    set(gca, 'XTickLabel', num2str((800:200:2000)'+50));
+                    set(gca, 'XTickLabel', num2str((Param.engine.speed_min:200:Param.engine.speed_max)'+50));
                     %set(gca, 'YTickLabel', num2str(flipud(Raster.Drehmoment'+50)));
                     set(gca, 'YTickLabel', num2str(flipud((fliplr(Param.engine.M_max:-200:min(Param.engine.drag_torque.trq)))'-50)));
                 end
@@ -636,7 +868,7 @@ function [ Results, Param ] = VSim_evaluation(Results, Param, Run, Cycle)
                     ylabel ('Torque [Nm]');
                     zlabel ('Eta');
 
-                    % Möglichkeit, das Wirkungsgradkennfeld der E-Maschine in 3D zu
+                    % Mï¿½glichkeit, das Wirkungsgradkennfeld der E-Maschine in 3D zu
                     % visualisieren, derzeit nicht im Einsatz
                     %             subplot (1,3,2);
                     %             surf(Param.em.efficiency.speed, Param.em.efficiency.torque , Param.em.efficiency.characteristic_map);

@@ -9,7 +9,7 @@ function [ transmission ] = Transmission_gearing(range, z_int, overdrive, dsg, f
 % ------------
 % Input:    - range:        spread (i_g_max / i_g_min)
 %                           is selected
-%           - z_int:        Number of gears, discrete variable between 1 and 4
+%           - z_int:        Number of gears, discrete variable between 1 and 8
 %           - overdrive:    Binary value 0 or 1, turn ON or OFF the
 %                           overdrive function in the transmission
 %           - dsg:          Binary (0 or 1), determines if there is a

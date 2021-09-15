@@ -36,7 +36,7 @@ Param.VSim.Opt     = false; % Display simulation results in figures
 
 %% Driving cycles
 %     Param.dcycle = 1;             % ACEA cycle
-     Param.dcycle = 2;             % Truckerrunde
+%      Param.dcycle = 2;             % Truckerrunde
 %     Param.dcycle = 3;             % Long_Haul
 %     Param.dcycle = 4;             % Uphill climb
 %     Param.dcycle = 5;             % Startup
@@ -51,6 +51,9 @@ Param.VSim.Opt     = false; % Display simulation results in figures
 %     Param.dcycle = 14;            % Stationary cycle LVK
 %     Param.dcycle = 15;            % Cycle for 30, 50, 60, 80 km/h
 %     Param.dcycle = 16;            % Full cycle between Sorriso and Santos
+     Param.dcycle = 21;            % Vecto Long Haul
+%     Param.dcycle = 22;            % Vecto Regional Delivery
+%     Param.dcycle = 23;            % Vecto Regional Delivery short
 
 %% Simulation run
 Param.cycle = Driving_cycle_loading(5);
@@ -69,6 +72,33 @@ for Run = 1:2
 
     % Simulation postprocessing
     [Results, Param] = VSim_evaluation(Results, Param, Run, Cycle); 
+end
+
+%% Eco-Efficiency
+% WARNING!!
+% Until now only the weighting methods 1,2 and 9 are reviewed. Do not use
+% the others for now, until corrected!
+% To be selected in the CaculateEcoEff Function
+%
+
+ifEco_Efficieny = true;
+ifPlot = true;
+
+% Select files for GaBiTables
+% initialize Param substruct // order is important // do not change!
+Param.GaBiFiles.Assembly = "GaBiTables\AssemblyTable20210406.mat";
+%Param.GaBiFiles.UsePhase = "GaBiTables\UsePhaseTable20210429.mat";
+Param.GaBiFiles.UsePhase = "GaBiTables\UsePhaseTable20210507.mat";
+Param.GaBiFiles.Recycling = "GaBiTables\RecyclingTable20210108.mat";
+Param.WeightingFiles.File = "WeightingTable\WeightingTable20210120.mat";
+
+if ifEco_Efficieny
+    
+    [Eco_Efficiency] = CalculateEcoEff(Param, 10, 'EU-28', 'UsePhase Diesel', 'hydrogen from smr');
+end
+
+if ifPlot && ifEco_Efficieny
+    plotEcoEfficiencyAnalysis(Eco_Efficiency, Param, 0);
 end
 
 %% Saving Results

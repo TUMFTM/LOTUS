@@ -53,11 +53,23 @@ function [tank] = Tank_sizes(Fueltype)
             tank.v_lng    = 300;
             tank.m_h2     = 0;
 
-        case 13 % Hydrogen vehicle
+        case {13} % FCEV
             tank.v_diesel = 0; 
             tank.v_cng    = 0;
             tank.v_lng    = 0;
-            tank.m_h2     = 30;     
+            tank.m_h2     = 20; %1500L 700bar 
+            
+        case {14,15} % Hydrogen vehicle
+            tank.v_diesel = 0; 
+            tank.v_cng    = 0;
+            tank.v_lng    = 0;
+            tank.m_h2     = 55; % 700bar 
+          
+        case {16,17} % Dual Fuel, Diesel + Hydrogen
+            tank.v_diesel = 300; 
+            tank.v_cng    = 0;
+            tank.v_lng    = 0;
+            tank.m_h2     = 24;
     end
 end
 

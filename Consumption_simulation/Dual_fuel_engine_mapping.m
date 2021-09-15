@@ -20,10 +20,15 @@ function [engine] = Dual_fuel_engine_mapping( Motormoment, Fueltype, n_lo, n_pre
 % ------------
 % Output:   - engine:      struct array containing the ICE engine variables
 % ------------
-load('Kennfeld_Dual-Fuel_Tschochner.mat'); % loads the characteristics of the original engine
+load('engineMap_Dual-Fuel_Tschochner.mat'); % loads the characteristics of the original engine
 
 engine.number = 2;
 engine.M_max_original = 2232; %[Nm]
+if Fueltype == 16 || Fueltype == 17 %H2 higher Efficiency
+    engine.bsfc.be=engine.bsfc.be.*(44/42);
+    engine.M_max_original = 2232*(44/42); %[Nm]
+    
+end
 engine.M_max = Motormoment; %[Nm] Maximum torque
 engine.scale_factor = engine.M_max / engine.M_max_original;
 
@@ -74,6 +79,14 @@ engine.shift_parameter.M_max = max(engine.full_load.trq);
         engine.fuel.co2_per_kg_gas       = 2.75;    %CO2 emissions per kg LNG [kg/kgLNG] = 50,0 MJ/kg * 55,0 gCO2/MJ = 2,75 kg CO2/ kg LNG
         engine.fuel.heat_of_combustion   = 49587.8; %Heating value [kJ/kg]: 94% LNG 50000kJ/kg, 6% Diesel 43130kJ/kg Source: LNG as an alternative fuel for the propulsion of ships and heavy commercial vehicles 
         engine.fuel.Gasart = 'LNG';
+        
+    elseif Fueltype == 16 || Fueltype == 17
+        % Dual-Fuel-CNG (hybrid)
+        engine.fuel.density_diesel	     = 0.830;   %density of Diesel [kg/l]
+        engine.fuel.co2_per_litre_diesel =	2.62;   %CO2 emissions per litre [kg/l] Source: LNG as an alternative fuel for the propulsion of ships and heavy commercial vehicles 
+        engine.fuel.co2_per_kg_gas       = 0;    %CO2 emissions per kg H2
+        engine.fuel.heat_of_combustion   = 115387.8; %Heating value [kJ/kg]: 94% H2 120000kJ/kg, 6% Diesel 43130kJ/kg -> 115387,8kJ/kg
+        engine.fuel.Gasart = 'H2';
     end
 % cd ../;  
 % cd ../;

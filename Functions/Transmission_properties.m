@@ -30,11 +30,11 @@ total_weight = Param.weights.m_Total; % Fully loaded condition
 %% Variables of the electric truck
 if Param.Fueltype == 7 || Param.Fueltype == 12 || Param.Fueltype == 13
    engine.full_load.speed = Param.em.speed;
-   engine.full_load.trq = Param.em.trq;
-   engine.full_load.power = Param.em.trq .* Param.em.speed * 2 * pi / (60 * 1000);
+   engine.full_load.trq = Param.em.trq .* Param.em.noEM;
+   engine.full_load.power = Param.em.trq .* Param.em.noEM .* Param.em.speed * 2 * pi / (60 * 1000);
    engine.speed_min = 0;
    engine.speed_max = Param.em.n_max;
-   engine.M_max = Param.em.M_max;
+   engine.M_max = Param.em.M_max .* Param.em.noEM;
 end
 
 %% Properties calculations
@@ -88,6 +88,9 @@ transmission.n_85 = 85 * 60 * final_drive.ratio * transmission.ratios(end) / (7.
 
 % Maximum power and traction at n_85
 P_n85 = interp1(engine.full_load.speed, engine.full_load.power, transmission.n_85); % kW
+if Param.Hybrid_Truck && ~Param.Electric_Truck
+    P_n85 = P_n85 + interp1(Param.em.speed, Param.em.speed.*Param.em.trq*2*pi/(1000*60), transmission.n_85); % kW
+end
 F_traction_n85 = P_n85 * 1000  * transmission.trq_eff(end) * final_drive.trq_eff / (85 / 3.6); % N
 
 % Travel resistance, level at 85 km/h, no acceleration, in N

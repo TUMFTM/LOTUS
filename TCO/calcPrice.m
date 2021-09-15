@@ -1,7 +1,7 @@
 function Param = calcPrice(Param, varargin)
-% Die Funktion calcPrice iteriert über alle Objekte einer Param und
-% erzeugt für jedes Objekt die Klasse Anschaffungspreis
-% Zusaätzlich werden Toll_rate und Taxes berechnet
+% Die Funktion calcPrice iteriert ï¿½ber alle Objekte einer Param und
+% erzeugt fï¿½r jedes Objekt die Klasse Anschaffungspreis
+% Zusaï¿½tzlich werden Toll_rate und Taxes berechnet
 
 if nargin == 1
     helpStruct = load('costStruct.mat');
@@ -10,7 +10,7 @@ else
     costStruct = varargin{1};
 end
 
-% Für Optimierung, Fixer Steuersatz EURO VI
+% Fï¿½r Optimierung, Fixer Steuersatz EURO VI
 SSK = 6;
 % Maut
 Param.TCO.Toll_rate = Maut(SSK, costStruct);
@@ -29,16 +29,16 @@ for k = 1:(1+Param.TCO_Trailer)%size(Param,2)
     %         Param.Anschaffungspreis = ...
     %             Anschaffungspreis(Param, costStruct.costFunction, k);
     
-    if k==1% Purchase_price für SZM in Klasse TCO übertragen
+    if k==1% Purchase_price fï¿½r SZM in Klasse TCO ï¿½bertragen
         Param.TCO.Purchase_price(1,k) = round(Param. ...
             acquisitionCosts.KA_ZM,0);
-        % Reifenpreis in Klasse TCO übertragen
-        % Fixer Reifenpreis für Optimierer Preis für Michelin X-Line Energy
-        % laut "güterverkehr", Ausgabe: April 2014, MAN TGX 18.480 XXL Euro 6
+        % Reifenpreis in Klasse TCO ï¿½bertragen
+        % Fixer Reifenpreis fï¿½r Optimierer Preis fï¿½r Michelin X-Line Energy
+        % laut "gï¿½terverkehr", Ausgabe: April 2014, MAN TGX 18.480 XXL Euro 6
         Param.TCO.Tire_costs_set(1,k) = ...
             450 * 6;
         % Insurance
-        % Insurance für SZM
+        % Insurance fï¿½r SZM
         Param.TCO.Insurance_vehicle(1,k) = ...
             costStruct.TCO.Insurance{2,1};
         % k Zugmaschine in Composition
@@ -53,6 +53,7 @@ for k = 1:(1+Param.TCO_Trailer)%size(Param,2)
         Param.TCO.Insurance_vehicle(1,k) = ...
             costStruct.TCO.Insurance{6,1};
 %         Param.TCO.Anschaffungspreis_Akkupack(1,k) = 0;
+        Param.TCO.residualValueBattery(1,k) = 0;
     end
 end
 end

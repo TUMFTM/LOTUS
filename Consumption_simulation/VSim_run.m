@@ -16,16 +16,20 @@ function [ Results ] = VSim_run(Param)
 %             consumption simulation
 % ------------
 % Creates temporary folders
-if Param.VSim.Opt == true
-    cwd = pwd;
-    addpath(cwd)
-    tmpdir = tempname;
-    mkdir(tmpdir)
-    cd(tmpdir)
-end
+% if Param.VSim.Opt == true
+%     cwd = pwd;
+%     addpath(cwd)
+%     tmpdir = tempname;
+%     mkdir(tmpdir)
+%     cd(tmpdir)
+% end
 
 % Loads the Simulink model
 load_system(Param.name);
+
+Simulink.sdi.setAutoArchiveMode(0);
+Simulink.sdi.setArchiveRunLimit(0);
+
 
 % If necessary, open the Simulink model, if desired by the user
 if Param.VSim.Display >= 2 && Param.VSim.Opt == 0 && Param.dcycle ~= 5
@@ -46,6 +50,12 @@ end
 
 % Running the simulation
 fprintf('Running the simulation.\n');
+%edit Seidenfus 2020
+if Param.Fueltype == 13
+    set_param(Param.name, 'RelTol', '10e-1');
+else
+    set_param(Param.name, 'RelTol', '1e-2');
+end
 sim(Param.name);
 
 list = whos;        % Existing variables
@@ -59,17 +69,17 @@ for  i = 1:length(list)
     end
 end
 
-% If necessary close Simulink model, if desired by user
+%If necessary close Simulink model, if desired by user
 if (Param.VSim.Display < 2)  ||  Param.VSim.Opt == 1
     bdclose(Param.name); % Delete without saving
 end
 
-% Delete temporary folder, multi-target optimization on multiple cores
-if Param.VSim.Opt == true
-    cd(cwd)
-    evalin('base', 'clear mex');
-    rmdir(tmpdir,'s')
-    rmpath(cwd)
-end
+%Delete temporary folder, multi-target optimization on multiple cores
+% if Param.VSim.Opt == true
+%     cd(cwd)
+%     evalin('base', 'clear mex');
+%     rmdir(tmpdir,'s')
+%     rmpath(cwd)
+% end
 
 end

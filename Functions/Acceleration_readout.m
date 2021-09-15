@@ -16,7 +16,7 @@ function [t_0_80] = Acceleration_readout(VSim)
 % Output:   - t_0_80:  a scalar number where the acceleration time is stored
 % ------------
     % If the consumption simulation is performed
-    if (VSim.bDiesel ~= 0 || VSim.bGas ~= 0 || VSim.energyTotal ~= 0)
+    if (VSim.bDiesel ~= 0 || VSim.bGas ~= 0 || VSim.energyTotal ~= 0 || VSim.Hydrogen_consumption ~= 0)
             v80_1=0;
             for i=1:length(VSim.v_t)
                 if VSim.v_t(i)==0
