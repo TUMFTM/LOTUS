@@ -518,6 +518,14 @@ switch Param.Fueltype
         Eco_Efficiency.UsePhase.amountHydrogen = Param.TCO.Hydrogen_consumption * Eco_Efficiency.Total_Milage / 100;
         %Param.VSim.Hydrogen_consumption; %Matlab weight in kg
         Eco_Efficiency.GaBiTables.UsePhase.gtHydrogen = GaBiTable(Eco_Efficiency.HydrogenType, "Hydrogen", Eco_Efficiency.UsePhase.amountHydrogen,0,0,Param.GaBiFiles.UsePhase); %scaled by Matlab weight
+
+    case 14
+        % Hydrogen
+        Eco_Efficiency.UsePhase.amountHydrogen = Param.TCO.Hydrogen_consumption * Eco_Efficiency.Total_Milage / 100;
+        %Param.VSim.Hydrogen_consumption; %Matlab weight in kg
+        Eco_Efficiency.GaBiTables.UsePhase.gtHydrogen = GaBiTable(Eco_Efficiency.HydrogenType, "Hydrogen", Eco_Efficiency.UsePhase.amountHydrogen,0,0,Param.GaBiFiles.UsePhase); %scaled by Matlab weight
+
+        
 end
 fnUse = fieldnames(Eco_Efficiency.GaBiTables.UsePhase);
 for i = 1 : numel(fnUse)

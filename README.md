@@ -108,10 +108,13 @@ If you want to contribute to this project, please contact the correspondence aut
 ## Versioning
 V1.0 Consumption simulation, weight and cost model for heavy-duty trucks
 
-V1.1 Powertrain topologies for electric heavy-duty trucks and VECTO driving cycles
+V1.1 Platooning
 
-V1.2 Eco-efficiency analysis
+V1.2 Powertrain topologies for electric heavy-duty trucks and VECTO driving cycles
 
+V1.3 Eco-efficiency analysis
+V1.3.1 Bugfix in Plotsscripts
+V1.3.2 Include Hydrogen Combustion Engine in Eco-Eficiency Assessment
 
 ## Authors
 Alexander Süßmann - Consumption Simulation for Diesel Trucks, Validation
