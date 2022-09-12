@@ -12,11 +12,13 @@ addpath('WeightingTable');
 ifSave = false;
 
 %% Load Vehicle Concepts
-results.reference       = load('Results/20210419_Reference.mat');
-results.dieselResult    = load('Results/20210419_Diesel.mat');
-results.hevResults      = load('Results/20210419_HEV.mat');
-results.bevResult       = load('Results/20210419_BEV.mat');
-results.fcevResult      = load('Results/20210419_FCEV.mat');
+results.reference       = load('Post-processing/JCP_EE/Results/20210419_Reference.mat');
+results.dieselResult    = load('Post-processing/JCP_EE/Results/20210507_Diesel_cost.mat');
+results.hevResults      = load('Post-processing/JCP_EE/Results/20210507_HEV_cost.mat');
+results.bevResult       = load('Post-processing/JCP_EE/Results/20210507_BEV_cost.mat');
+results.fcevResult      = load('Post-processing/JCP_EE/Results/20210507_FCEV_cost.mat');
+results.hiceResult      = load('Post-processing/JCP_EE/Results/20210507_HICE_cost.mat');
+
 temp = cellstr(fieldnames(results));
 
 %% Set Gabi and Weighting Tables
@@ -26,10 +28,11 @@ temp = cellstr(fieldnames(results));
 % some names changed and the new sets do not work with this script. The
 % intention of using the old ones is to reproduce the content of the paper.
 % Feel free to update to newer version.
-assemblyPath = "GaBiTables\AssemblyTable20210108.mat";
-usePhasePath = "GaBiTables\UsePhaseTable20210113.mat";
+assemblyPath = "GaBiTables\AssemblyTable20210406.mat";
+usePhasePath = "GaBiTables\UsePhaseTable20210507.mat";
 recyclingPath = "GaBiTables\RecyclingTable20210108.mat";
 weightingPath = "WeightingTable\WeightingTable20210120.mat";
+
 
 %% Define Scenarios
 load('TCO\Scenarios.mat', 'scenarios');
@@ -95,7 +98,7 @@ for i2 = 1:length(temp2)
 %         results.(temp{i}).Param.TCO.Lebensdauer_Batteriepack = 11;
         
         [results.(temp{i}).Results, results.(temp{i}).Param] = VSim_evaluation(results.(temp{i}).Results, results.(temp{i}).Param, 2, results.(temp{i}).Param.dcycle);
-        y(1,i) = results.(temp{i}).Param.TCO.Total_costs;
+        y(1,i) = results.(temp{i}).Param.TCO.Total_costs/(results.(temp{i}).Param.TCO.Annual_mileage(1)*(results.(temp{i}).Param.vehicle.payload/1000));
         
         [results.(temp{i}).Eco_Efficiency] = CalculateEcoEff(results.(temp{i}).Param, 10, electricityMix, dieselPath, hydrogenPath);
         %     [results.(temp{i}).Eco_Efficiency] = CalculateEcoEff(results.(temp{i}).Param, 10, temp2{i2}, dieselPath, temp3{i2});
@@ -109,11 +112,12 @@ for i2 = 1:length(temp2)
     vehicleNames = {'Reference', 'Diesel', 'HEV', 'BEV', 'FCEV'};
     for i3=1:length(temp)
         temp3 = [results.(temp{i3}).Eco_Efficiency.Sum.weightedAssembly; results.(temp{i3}).Eco_Efficiency.Sum.weightedUsePhase; results.(temp{i3}).Eco_Efficiency.Sum.weightedRecycling];
-        temp3(:,end+1) =  ones(3,1).*results.(temp{i3}).Param.TCO.Total_costs;
+        temp3(:,end+1) =  ones(3,1).*results.(temp{i3}).Param.TCO.Total_costs/(results.(temp{i3}).Param.TCO.Annual_mileage(1)*(results.(temp{i3}).Param.vehicle.payload/1000));
         % Calculate acquistion costs
         acqCosts(i3,:) = results.(temp{i3}).Param.TCO.Purchase_price(1);
         % Calculate acquistion costs
         annMilaege(i3,:) = results.(temp{i3}).Param.TCO.Annual_mileage(1);
+
         if ifSave
         csvwrite(strcat('H:', filesep,'__Diss', filesep,'02_Daten', filesep,'OptiResults', filesep, scenarioSelect, vehicleNames{i3}, '_EcoEff.csv'), temp3)
         run('H:\__Diss\02_Daten\OptiResults\results2tikz.m')
@@ -131,7 +135,7 @@ scenarioSelect = 'Reference';
 
 % Set variables for senstitivity
 temp2 = {'DE', 'EU-28', '2050', 'CN'};
-temp3 = {'hydrogen from electrolysis DE', 'hydrogen from electrolysis EU', 'hydrogen from electrolysis Wind', 'hydrogen from electrolysis CN'};
+temp3 = {'hydrogen from electrolysis', 'hydrogen from pv no loss', 'hydrogen from wind no loss', 'hydrogen from smr'};
 
 % Remove reference vehicle as its not used for sensitivity
 results = rmfield(results, 'reference');
@@ -153,7 +157,7 @@ for i=1:length(temp)
     results.(temp{i}).Param.acquisitionCosts.KTFC_VK = scenarios.HydrogenTankCosts(scenarioSelect);
 
     [results.(temp{i}).Results, results.(temp{i}).Param] = VSim_evaluation(results.(temp{i}).Results, results.(temp{i}).Param, 2, results.(temp{i}).Param.dcycle);
-    y(1,i) = results.(temp{i}).Param.TCO.Total_costs;
+    y(1,i) = results.(temp{i}).Param.TCO.Total_costs/(results.(temp{i}).Param.TCO.Annual_mileage(1)*(results.(temp{i}).Param.vehicle.payload/1000));
     
     [results.(temp{i}).Eco_Efficiency] = CalculateEcoEff(results.(temp{i}).Param, 10, temp2{i2}, dieselPath, temp3{i2});
 
@@ -161,7 +165,7 @@ for i=1:length(temp)
     yOut(i,:) = [i, y(1,i), y(2,i)];
 end
 % Save output
-yOut = array2table(yOut, 'VariableNames', {'MetaIdx', 'TCO', 'EEI'}, 'RowNames', {'Diesel', 'HEV', 'BEV', 'FCEV'});
+yOut = array2table(yOut, 'VariableNames', {'MetaIdx', 'TCO', 'EEI'}, 'RowNames', {'Diesel', 'HEV', 'BEV', 'FCEV', 'HICE'});
 if ifSave
 writetable(yOut, strcat('H:', filesep,'__Diss', filesep,'02_Daten', filesep,'Sensitivity', filesep, 'resultsEEI_', temp2{i2}, '.csv'),'WriteRowNames',true)
 end
@@ -191,7 +195,7 @@ for i=1:length(temp)
     results.(temp{i}).Param.acquisitionCosts.KTFC_VK = scenarios.HydrogenTankCosts(scenarioSelect);
 
     [results.(temp{i}).Results, results.(temp{i}).Param] = VSim_evaluation(results.(temp{i}).Results, results.(temp{i}).Param, 2, results.(temp{i}).Param.dcycle);
-    y(1,i) = results.(temp{i}).Param.TCO.Total_costs;
+    y(1,i) = results.(temp{i}).Param.TCO.Total_costs/(results.(temp{i}).Param.TCO.Annual_mileage(1)*(results.(temp{i}).Param.vehicle.payload/1000));
     
     [results.(temp{i}).Eco_Efficiency] = CalculateEcoEff(results.(temp{i}).Param, temp2(i2), electricityMix, dieselPath, hydrogenPath);
 %     [results.(temp{i}).Eco_Efficiency] = CalculateEcoEff(results.(temp{i}).Param, 10, temp2{i2}, dieselPath, temp3{i2});
@@ -201,7 +205,7 @@ for i=1:length(temp)
 end
 
 % Save output
-yOut = array2table(yOut, 'VariableNames', {'MetaIdx', 'TCO', 'EEI'}, 'RowNames', {'Diesel', 'HEV', 'BEV', 'FCEV'});
+yOut = array2table(yOut, 'VariableNames', {'MetaIdx', 'TCO', 'EEI'}, 'RowNames', {'Diesel', 'HEV', 'BEV', 'FCEV', 'HICE'});
 % writetable(yOut, strcat('H:', filesep,'__Diss', filesep,'02_Daten', filesep,'Scenarios', filesep, 'resultsEEI_', temp2{i2}, '.csv'),'WriteRowNames',true)
 if ifSave
     writetable(yOut, strcat('H:', filesep,'__Diss', filesep,'02_Daten', filesep,'Sensitivity', filesep, 'resultsEEI_', mat2str(temp2(i2)), '.csv'),'WriteRowNames',true)
@@ -251,20 +255,20 @@ for i=1:length(temp)
     results.(temp{i}).Param.acquisitionCosts.KTFC_VK = scenarios.HydrogenTankCosts(scenarioSelect);
 
     [results.(temp{i}).Results, results.(temp{i}).Param] = VSim_evaluation(results.(temp{i}).Results, results.(temp{i}).Param, 2, results.(temp{i}).Param.dcycle);
-    y(1,i) = results.(temp{i}).Param.TCO.Total_costs;
+    y(1,i) = results.(temp{i}).Param.TCO.Total_costs/(results.(temp{i}).Param.TCO.Annual_mileage(1)*(results.(temp{i}).Param.vehicle.payload/1000));
     
     [results.(temp{i}).Eco_Efficiency] = CalculateEcoEff(results.(temp{i}).Param, temp4(i3), electricityMix, dieselPath, hydrogenPath);
 %     [results.(temp{i}).Eco_Efficiency] = CalculateEcoEff(results.(temp{i}).Param, 10, temp2{i2}, dieselPath, temp3{i2});
-
-    y(2,i) = results.(temp{i}).Eco_Efficiency.Eco_Impact;
-    yOut(i,:) = [i, y(1,i), y(2,i)];
+    lifeCycleGWP(1,i) = results.(temp{i}).Eco_Efficiency.Impacts.GWP(1)/(results.(temp{i}).Param.TCO.Annual_mileage(1)*(results.(temp{i}).Param.vehicle.payload/1000));
+    y(2,i) = results.(temp{i}).Eco_Efficiency.Eco_Impact/(results.(temp{i}).Param.TCO.Annual_mileage(1)*(results.(temp{i}).Param.vehicle.payload/1000));
+    yOut(i,:) = [i, y(1,i), y(2,i), lifeCycleGWP(1,i)];
 end
 
 % Save output
-yOut = array2table(yOut, 'VariableNames', {'MetaIdx', 'TCO', 'EEI'}, 'RowNames', {'Diesel', 'HEV', 'BEV', 'FCEV'});
-    if ifSave
-    writetable(yOut, strcat('H:', filesep,'__Diss', filesep,'02_Daten', filesep,'Scenarios', filesep, 'resultsEEI_Scenario', scenarioSelect,'_', mat2str(temp4(i3)), '.csv'),'WriteRowNames',true)
-    end
+yOut = array2table(yOut, 'VariableNames', {'MetaIdx', 'TCO', 'EEI', 'GWP'}, 'RowNames', {'Diesel', 'HEV', 'BEV', 'FCEV', 'HICE'});
+%     if ifSave
+    writetable(yOut, strcat('C:', filesep,'__DissNeu', filesep,'02_Daten', filesep,'Scenarios', filesep, 'resultsEEI_ScenarioGWP', scenarioSelect,'_', mat2str(temp4(i3)), '.csv'),'WriteRowNames',true)
+%     end
 end
 end
 
