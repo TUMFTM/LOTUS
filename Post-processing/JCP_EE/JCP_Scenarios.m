@@ -259,7 +259,7 @@ for i=1:length(temp)
     
     [results.(temp{i}).Eco_Efficiency] = CalculateEcoEff(results.(temp{i}).Param, temp4(i3), electricityMix, dieselPath, hydrogenPath);
 %     [results.(temp{i}).Eco_Efficiency] = CalculateEcoEff(results.(temp{i}).Param, 10, temp2{i2}, dieselPath, temp3{i2});
-    lifeCycleGWP(1,i) = results.(temp{i}).Eco_Efficiency.Impacts.GWP(1)/(results.(temp{i}).Param.TCO.Annual_mileage(1)*(results.(temp{i}).Param.vehicle.payload/1000));
+    lifeCycleGWP(1,i) = results.(temp{i}).Eco_Efficiency.Impacts.GWP(1)/(results.(temp{i}).Param.TCO.Annual_mileage(1)*results.(temp{i}).Param.TCO.Operating_life(1)*(results.(temp{i}).Param.vehicle.payload/1000));
     y(2,i) = results.(temp{i}).Eco_Efficiency.Eco_Impact/(results.(temp{i}).Param.TCO.Annual_mileage(1)*(results.(temp{i}).Param.vehicle.payload/1000));
     yOut(i,:) = [i, y(1,i), y(2,i), lifeCycleGWP(1,i)];
 end
