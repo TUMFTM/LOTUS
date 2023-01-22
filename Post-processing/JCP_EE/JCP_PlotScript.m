@@ -8,11 +8,11 @@
 % hevResult = load('C:\Truck Simulation\Results\CIRP LCE\OptimizationResults\2021-01-14_1021_EcoEff_4_512.mat');
 % fcevResult = load('C:\Truck Simulation\Results\CIRP LCE\OptimizationResults\2021-01-14_1046_EcoEff_13_160.mat');
 % Results with updated battery recycling costs
-dieselResult = load('Post-processing\JCP_EE\Results\OptimizationResults\2021-05-04_1259_EcoEff_1_512.mat');
-bevResult = load('Post-processing\JCP_EE\Results\OptimizationResults\2021-05-07_0707_EcoEff_7_520.mat');
-hevResult = load('Post-processing\JCP_EE\Results\OptimizationResults\2021-05-04_1311_EcoEff_4_512.mat');
-fcevResult = load('Post-processing\JCP_EE\Results\OptimizationResults\2021-05-07_0723_EcoEff_13_160.mat');
-hiceResult = load('Post-processing\JCP_EE\Results\OptimizationResults\2021-05-21_0931_EcoEff_14_520.mat');
+dieselResult = load('Post-processing/JCP_EE/Results_EE/2021-05-04_1259_EcoEff_1_512.mat');
+bevResult = load('Post-processing/JCP_EE/Results_EE/2021-05-07_0707_EcoEff_7_520.mat');
+hevResult = load('Post-processing/JCP_EE/Results_EE/2021-05-17_1343_EcoEff_4_520.mat');
+fcevResult = load('Post-processing/JCP_EE/Results_EE/2021-05-21_0812_EcoEff_13_160.mat');
+hiceResult = load('Post-processing/JCP_EE/Results_EE/2021-12-23_1249_EcoEff_14_520.mat');
 
 
 pop     = dieselResult.result.opt.popsize;
@@ -20,35 +20,39 @@ maxGen  = dieselResult.result.opt.maxGen;
 numObj  = length(dieselResult.result.pops(1).obj);
 
 objDiesel     = dieselResult.y;% vertcat(dieselResult.result.pops(maxGen,:).obj);
-objBEV     = bevResult.y; %vertcat(bevResult.result.pops(maxGen,:).obj);
+objBEV     = vertcat(bevResult.result.pops(maxGen,:).obj);%bevResult.y; %
 objHEV     = hevResult.y; %vertcat(hevResult.result.pops(end,:).obj);
 objFCEV = fcevResult.y; % (FCEVresult.result.pops(end,:).obj);
-objHICE = hiceResult.y;
-
+objHICE = hiceResult.y; % (FCEVresult.result.pops(end,:).obj);
 
 
 objDiesel(:,3) = -objDiesel(:,3);
 objDiesel(:,4) = 1:length(objDiesel);
-objDiesel = sortrows(objDiesel, 1);
+
 
 objBEV(:,3) = -objBEV(:,3);
 objBEV(:,4) = 1:length(objBEV);
-objBEV = sortrows(objBEV, 1);
+
 
 objHEV(:,3) = -objHEV(:,3);
 objHEV(:,4) = 1:length(objHEV);
-objHEV = sortrows(objHEV, 1);
+
 
 objFCEV(:,3) = -objFCEV(:,3);
 objFCEV(:,4) = 1:length(objFCEV);
-objFCEV = sortrows(objFCEV, 1);
 
 objHICE(:,3) = -objHICE(:,3);
 objHICE(:,4) = 1:length(objHICE);
+
+
+
+%% Output design variables for vehicle with lowst TCO or EII
+
+objDiesel = sortrows(objDiesel, 1);
+objBEV = sortrows(objBEV, 1);
+objHEV = sortrows(objHEV, 1);
+objFCEV = sortrows(objFCEV, 1);
 objHICE = sortrows(objHICE, 1);
-
-
-%%
 
 
 fprintf('%.4f ', round(dieselResult.result.pops(end,objDiesel(1,4)).var,4))
@@ -61,6 +65,76 @@ fprintf('%.4f ', round(fcevResult.result.pops(end,objFCEV(1,4)).var,4))
 fprintf('\n')
 fprintf('%.4f ', round(hiceResult.result.pops(end,objHICE(1,4)).var,4))
 fprintf('\n')
+
+
+%% Save Data to csv for paper
+csvwrite('/Users/sebastianwolff/Documents/disswolff/02_Daten/OptiResults/resultsDiesel.csv', objDiesel)
+csvwrite('/Users/sebastianwolff/Documents/disswolff/02_Daten/OptiResults/resultsHEV.csv', objHEV)
+csvwrite('/Users/sebastianwolff/Documents/disswolff/02_Daten/OptiResults/resultsBEV.csv', objBEV)
+csvwrite('/Users/sebastianwolff/Documents/disswolff/02_Daten/OptiResults/resultsFCEV.csv', objFCEV)
+csvwrite('/Users/sebastianwolff/Documents/disswolff/02_Daten/OptiResults/resultsHICE.csv', objHICE)
+
+
+%% Output data for results table
+
+
+dataOut = [%TCO
+           mean(dieselResult.y(:,1)), mean(hevResult.y(:,1)), mean(bevResult.y(:,1)), mean(fcevResult.y(:,1)), mean(hiceResult.y(:,1));...
+           min(dieselResult.y(:,1)), min(hevResult.y(:,1)), min(bevResult.y(:,1)), min(fcevResult.y(:,1)), min(hiceResult.y(:,1));...
+           max(dieselResult.y(:,1)), max(hevResult.y(:,1)), max(bevResult.y(:,1)), max(fcevResult.y(:,1)), max(hiceResult.y(:,1));...
+           % EII
+           mean(dieselResult.y(:,2)), mean(hevResult.y(:,2)), mean(bevResult.y(:,2)), mean(fcevResult.y(:,2)), mean(hiceResult.y(:,2));...
+           min(dieselResult.y(:,2)), min(hevResult.y(:,2)), min(bevResult.y(:,2)), min(fcevResult.y(:,2)), min(hiceResult.y(:,2));...
+           max(dieselResult.y(:,2)), max(hevResult.y(:,2)), max(bevResult.y(:,2)), max(fcevResult.y(:,2)), max(hiceResult.y(:,2));...
+           % RCA
+           mean(-dieselResult.y(:,3)), mean(-hevResult.y(:,3)), mean(-bevResult.y(:,3)), mean(-fcevResult.y(:,3)), mean(-hiceResult.y(:,3));...
+           min(-dieselResult.y(:,3)), min(-hevResult.y(:,3)), min(-bevResult.y(:,3)), min(-fcevResult.y(:,3)), min(-hiceResult.y(:,3));...
+           max(-dieselResult.y(:,3)), max(-hevResult.y(:,3)), max(-bevResult.y(:,3)), max(-fcevResult.y(:,3)), max(-hiceResult.y(:,3));...
+           % Energy consumption
+           mean(dieselResult.energy), mean(hevResult.energy), mean(bevResult.energy), mean(fcevResult.energy), mean(hiceResult.energy);...
+           min(dieselResult.energy), min(hevResult.energy), min(bevResult.energy), min(fcevResult.energy), min(hiceResult.energy);...
+           max(dieselResult.energy), max(hevResult.energy), max(bevResult.energy), max(fcevResult.energy), max(hiceResult.energy);...
+           % Mileage
+           mean(dieselResult.mileage), mean(hevResult.mileage), mean(bevResult.mileage), mean(fcevResult.mileage), mean(hiceResult.mileage);...
+           min(dieselResult.mileage), min(hevResult.mileage), min(bevResult.mileage), min(fcevResult.mileage), min(hiceResult.mileage);...
+           max(dieselResult.mileage), max(hevResult.mileage), max(bevResult.mileage), max(fcevResult.mileage), max(hiceResult.mileage);...
+           % Weight
+           mean(dieselResult.weight), mean(hevResult.weight), mean(bevResult.weight), mean(fcevResult.weight), mean(hiceResult.weight);...
+           min(dieselResult.weight), min(hevResult.weight), min(bevResult.weight), min(fcevResult.weight), min(hiceResult.weight);...
+           max(dieselResult.weight), max(hevResult.weight), max(bevResult.weight), max(fcevResult.weight), max(hiceResult.weight);...
+    ];
+
+%%
+
+varDiesel     = vertcat(dieselResult.result.pops(maxGen,:).var);
+varBEV        = vertcat(bevResult.result.pops(maxGen,:).var);
+varHEV        = vertcat(hevResult.result.pops(end,:).var);
+varFCEV       = vertcat(fcevResult.result.pops(end,:).var);
+varHICE       = vertcat(hiceResult.result.pops(end,:).var);
+
+[mean(varDiesel); min(varDiesel); max(varDiesel); std(varDiesel)]
+[mean(varBEV); min(varBEV); max(varBEV); std(varBEV)]
+[mean(varHEV); min(varHEV); max(varHEV); std(varHEV)]
+[mean(varFCEV); min(varFCEV); max(varFCEV); std(varFCEV)]
+[mean(varHICE); min(varHICE); max(varHICE); std(varHICE)]
+
+
+%%
+temp = array2table([objDiesel(:,1:3) varDiesel], 'VariableNames', {'TCO', 'EII', 'RCA', 'Gear Spread', 'z', 'Rear Axle Ratio', 'T_{ICE, max}', 'n_{shift, low}', 'n_{shift, high}', 'v_{PPC}', 'd_{look ahead}', 'd_{slope, pos.}', 'd_{slope, neg.}'});
+writetable(temp, strcat('C:', filesep,'__Diss', filesep,'02_Daten', filesep,'OptiResults', filesep, 'resultsEEI_Diesel_Var', '.csv'))
+
+temp = array2table([objHEV(:,1:3) varHEV], 'VariableNames', {'TCO', 'EII', 'RCA', 'Gear Spread', 'z', 'Rear Axle Ratio', 'T_{ICE, max}', 'n_{shift, low}', 'n_{shift, high}', 'v_{PPC}', 'd_{look ahead}', 'd_{slope, pos.}', 'd_{slope, neg.}', 'T_{EM, max}', 'n_{EM, rated}', 'C_{Bat}', 'SOC_{target}', 'SOC_{min, boost}', 'T_{max, el.}', 'SOC_{min, el.}', 'T_{slp, up}', 'T_{slp, down}', 'slope', 'd_{delta, alt.}', 'd_{delta, alt., crit}', 'SOC_{add.}', 'DoD', 'Bat Type', 'EM Type'});
+writetable(temp, strcat('C:', filesep,'__Diss', filesep,'02_Daten', filesep,'OptiResults', filesep, 'resultsEEI_HEV_Var', '.csv'))
+
+temp = array2table([objBEV(:,1:3) varBEV bevResult.mileage' bevResult.weight' bevResult.energy'], 'VariableNames', {'TCO', 'EII', 'RCA', 'T_{EM, max}', 'n_{rated}', 'DoD', 'C_{Bat}', 'Rear Axle Ratio', 'Gear Spread', 'z', 'Battery Type', 'EM Type', 'Mileage', 'Mass', 'Energy'});
+writetable(temp, strcat('C:', filesep,'__Diss', filesep,'02_Daten', filesep,'OptiResults', filesep, 'resultsEEI_BEV_Var', '.csv'))
+
+temp = array2table([objFCEV(:,1:3) varFCEV], 'VariableNames', {'TCO', 'EII', 'RCA', 'T_{EM, max}', 'n_{rated}', 'DoD', 'C_{Bat}', 'Rear Axle Ratio', 'Gear Spread', 'z', 'Battery Type', 'EM Type', 'P_{FCEV}'});
+writetable(temp, strcat('C:', filesep,'__Diss', filesep,'02_Daten', filesep,'OptiResults', filesep, 'resultsEEI_FCEV_Var', '.csv'))
+
+temp = array2table([objHICE(:,1:3) varHICE], 'VariableNames', {'TCO', 'EII', 'RCA', 'Gear Spread', 'z', 'Rear Axle Ratio', 'T_{ICE, max}', 'n_{shift, low}', 'n_{shift, high}', 'v_{PPC}', 'd_{look ahead}', 'd_{slope, pos.}', 'd_{slope, neg.}'});
+writetable(temp, strcat('C:', filesep,'__Diss', filesep,'02_Daten', filesep,'OptiResults', filesep, 'resultsEEI_HICE_Var', '.csv'))
+
 
 
 %%
