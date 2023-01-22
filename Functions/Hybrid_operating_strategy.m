@@ -22,7 +22,8 @@ function [SOC_addition,critical_altitude_difference,distance_PPC_altitude_differ
         case{4,5,6,10,11,15,17} % All hybrid drivetrains
             % Electric motor parameters
             em.M_max                             = x(13);
-            em.n_eck                             = x(14);
+            Temp4 = 2000:100:6000;           % Diskretisierung der Eckdrehzahl von 500 bis 5000 rpm in 10er Schritten
+            em.n_eck                             = Temp4(x(14));
             em.Type                              = x(28); %Electrical machine type, 1: PMSM; 2: ASM
             em.P_max                             = ((em.n_eck * em.M_max *2* pi)/60)/1000; %[kW] Maximum power
             em.n_max                             = 2000;  %[rpm] Maximum rotational speed
