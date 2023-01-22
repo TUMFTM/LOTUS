@@ -31,11 +31,11 @@ if ~isMultiple % only one solution
     
     y = Eco_Efficiency.Eco_Impact;
     %y1 = Eco_Efficiency.Sum.Assembly.GWP;
-     y1 = Eco_Efficiency.Sum.Impact_Assembly;
+     y1 = Eco_Efficiency.Sum.Impact_Assembly/(Param.TCO.Annual_mileage(1)*Param.TCO.Operating_life(1)*(Param.vehicle.payload/1000));
     %y2 = Eco_Efficiency.Sum.UsePhase.GWP;
-     y2 = Eco_Efficiency.Sum.Impact_UsePhase;
+     y2 = Eco_Efficiency.Sum.Impact_UsePhase/(Param.TCO.Annual_mileage(1)*Param.TCO.Operating_life(1)*(Param.vehicle.payload/1000));
     %y3 = Eco_Efficiency.Sum.Recycling.GWP;
-     y3 = Eco_Efficiency.Sum.Impact_Recycling;
+     y3 = Eco_Efficiency.Sum.Impact_Recycling/(Param.TCO.Annual_mileage(1)*Param.TCO.Operating_life(1)*(Param.vehicle.payload/1000));
     
     switch Param.Vehicle
         case  {"BEV" , "BEV_Tesla"}
@@ -82,7 +82,7 @@ if ~isMultiple % only one solution
     title ('Eco Efficiency');
     xlabel  ('Total Cost of Ownership [€/tkm]')
     %axis ([0 500000 -2e-6 3e-6]);
-    axis ([0 15 Eco_Efficiency.Sum.Impact_Recycling*2 Eco_Efficiency.Eco_Impact*2]);
+    axis ([0 15 y3*2 y*2]);
     ylabel  ('Environmental Impact')
 else
     %multiple solution
