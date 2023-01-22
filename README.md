@@ -115,6 +115,8 @@ V1.2 Powertrain topologies for electric heavy-duty trucks and VECTO driving cycl
 V1.3 Eco-efficiency analysis
 V1.3.1 Bugfix in Plotsscripts
 V1.3.2 Include Hydrogen Combustion Engine in Eco-Eficiency Assessment
+V1.3.3 Bugfixes in Eco-Eff calculation, functional unit and plotscripts
+
 
 ## Authors
 Alexander Süßmann - Consumption Simulation for Diesel Trucks, Validation
