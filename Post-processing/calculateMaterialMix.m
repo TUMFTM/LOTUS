@@ -9,7 +9,7 @@ function [MaterialMix, ComponentList] = calculateMaterialMix(Param, Eco_Efficien
 % considered as they are treated piecewise.
 
 % this can be updated later, if new tables are available
-load('MaterialMix20200516.mat'); % variable is called materialMix // do not confuse with MaterialMix
+load('GaBiTables/MaterialMix20200516.mat'); % variable is called materialMix // do not confuse with MaterialMix
 
 % check the Matlabweights
 MatWeight = Eco_Efficiency.MatlabWeight;
