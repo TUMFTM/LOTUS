@@ -31,7 +31,7 @@ ifOptimized = true; % ifOptimized simulates using an optimized vehicle, the fuel
 
 %% Simulation propertie
 Param.VSim         = struct;
-Param.VSim.Display = 3; % 0: command window only  1: Display figures 2: display simulation and figures, 3: display simulation
+Param.VSim.Display = 0; % 0: command window only  1: Display figures 2: display simulation and figures, 3: display simulation
 Param.VSim.Opt     = false; % Display simulation results in figures
 
 %% Driving cycles
@@ -86,11 +86,11 @@ ifPlot = true;
 
 % Select files for GaBiTables
 % initialize Param substruct // order is important // do not change!
-Param.GaBiFiles.Assembly = "GaBiTables\AssemblyTable20210406.mat";
+Param.GaBiFiles.Assembly = "GaBiTables/AssemblyTable20210406.mat";
 %Param.GaBiFiles.UsePhase = "GaBiTables\UsePhaseTable20210429.mat";
-Param.GaBiFiles.UsePhase = "GaBiTables\UsePhaseTable20210507.mat";
-Param.GaBiFiles.Recycling = "GaBiTables\RecyclingTable20210108.mat";
-Param.WeightingFiles.File = "WeightingTable\WeightingTable20210120.mat";
+Param.GaBiFiles.UsePhase = "GaBiTables/UsePhaseTable20210507.mat";
+Param.GaBiFiles.Recycling = "GaBiTables/RecyclingTable20210108.mat";
+Param.WeightingFiles.File = "WeightingTable/WeightingTable20210120.mat";
 
 if ifEco_Efficieny
     
