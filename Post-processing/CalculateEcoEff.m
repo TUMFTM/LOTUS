@@ -223,6 +223,7 @@ Eco_Efficiency.GaBiTables.gtAsssemblyTransport =      GaBiTable("RER: transport,
 
 assemblyString = strcat(name_buff," Truck Assembly <e-ep>");
 %Eco_Efficiency.GaBiTables.gtAsssembly         =      GaBiTable(assemblyString, name_buff, Eco_Efficiency.Assembly.ElectricityTotal/2703.6, 0, 0, Param.GaBiFiles.Assembly);
+%Eco_Efficiency.GaBiTables.gtBatteryElAl       =     GaBiTable(Eco_Efficiency.ElectricityType,"Electricity",Eco_Efficiency.Assembly.ElectricityShare.BatteryEV,0,0,Param.GaBiFiles.UsePhase);
 Eco_Efficiency.GaBiTables.gtAsssembly         =     GaBiTable(Eco_Efficiency.ElectricityType,"Electricity",Eco_Efficiency.Assembly.ElectricityTotal,0,0,Param.GaBiFiles.UsePhase);
 if  ~strcmp(name_buff,"FCEV")
 Eco_Efficiency.GaBiTables.gTAssemblyTapWater  =      GaBiTable("RER: tap water, at user", name_buff, 1, 0, 0, Param.GaBiFiles.Assembly);
@@ -240,6 +241,8 @@ end
 switch Param.Fueltype
     
     case {7, 12}
+        Eco_Efficiency.GaBiTables.gtBatteryElAl       =     GaBiTable(Eco_Efficiency.ElectricityType,"Electricity",Eco_Efficiency.Assembly.ElectricityShare.BatteryEV,0,0,Param.GaBiFiles.UsePhase);
+        Eco_Efficiency.GaBiTables.gtAsssembly         =     GaBiTable(Eco_Efficiency.ElectricityType,"Electricity",Eco_Efficiency.Assembly.ElectricityTotal-Eco_Efficiency.Assembly.ElectricityShare.BatteryEV,0,0,Param.GaBiFiles.UsePhase);
         Eco_Efficiency.GaBiTables.gtTransmission = GaBiTable("Transmission",name_buff,Eco_Efficiency.MatlabWeight.m_Transmission,0,0,Param.GaBiFiles.Assembly);
         %gtCoolandandOil = GaBiTable("",name_buff,m_CoolantandOil);
         %maybe part of others. need to be checked
@@ -257,6 +260,8 @@ switch Param.Fueltype
         Eco_Efficiency.GaBiTables.gtBatteryLeadAcid = GaBiTable("Battery Lead Acid", name_buff, Eco_Efficiency.MatlabWeight.m_BatteryLeadAcid,0,0,Param.GaBiFiles.Assembly);
         
     case 4
+        Eco_Efficiency.GaBiTables.gtBatteryElAl       =     GaBiTable(Eco_Efficiency.ElectricityType,"Electricity",Eco_Efficiency.Assembly.ElectricityShare.BatteryHEV,0,0,Param.GaBiFiles.UsePhase);
+        Eco_Efficiency.GaBiTables.gtAsssembly         =     GaBiTable(Eco_Efficiency.ElectricityType,"Electricity",Eco_Efficiency.Assembly.ElectricityTotal-Eco_Efficiency.Assembly.ElectricityShare.BatteryHEV,0,0,Param.GaBiFiles.UsePhase);
         Eco_Efficiency.GaBiTables.gtTransmission = GaBiTable("Transmission", name_buff, Eco_Efficiency.MatlabWeight.m_Transmission,0,0,Param.GaBiFiles.Assembly);
         Eco_Efficiency.GaBiTables.gtExhaustSysHEV = GaBiTable("Exhaust system HEV", name_buff,Eco_Efficiency.MatlabWeight.m_ExhaustSys,0,0,Param.GaBiFiles.Assembly);
         Eco_Efficiency.GaBiTables.gtEngineHEV = GaBiTable("Engine HEV", name_buff, Eco_Efficiency.MatlabWeight.m_EngineHEV,0,0,Param.GaBiFiles.Assembly);
@@ -268,6 +273,8 @@ switch Param.Fueltype
         Eco_Efficiency.GaBiTables.gtE_EngineHEV = GaBiTable("E-Engine EV", name_buff, Eco_Efficiency.MatlabWeight.m_E_EngineHEV,0,0,Param.GaBiFiles.Assembly);
         
     case 13
+        Eco_Efficiency.GaBiTables.gtBatteryElAl       =     GaBiTable(Eco_Efficiency.ElectricityType,"Electricity",Eco_Efficiency.Assembly.ElectricityShare.BatteryFCEV,0,0,Param.GaBiFiles.UsePhase);
+        Eco_Efficiency.GaBiTables.gtAsssembly         =     GaBiTable(Eco_Efficiency.ElectricityType,"Electricity",Eco_Efficiency.Assembly.ElectricityTotal-Eco_Efficiency.Assembly.ElectricityShare.BatteryFCEV,0,0,Param.GaBiFiles.UsePhase);
         Eco_Efficiency.GaBiTables.gtTransmission = GaBiTable("Transmission",name_buff, Eco_Efficiency.MatlabWeight.m_Transmission,0,0,Param.GaBiFiles.Assembly);
         Eco_Efficiency.GaBiTables.gtBatteryFCEV = GaBiTable("Battery Dai [1000kWh]", name_buff, Eco_Efficiency.MatlabWeight.m_BatteryFCEV,0,0,Param.GaBiFiles.Assembly);
         Eco_Efficiency.GaBiTables.gtH2Tank = GaBiTable("Hydrogen tank",name_buff, Eco_Efficiency.MatlabWeight.m_H2Tank,0,0,Param.GaBiFiles.Assembly);
@@ -792,8 +799,9 @@ Eco_Efficiency.Sum.weightedRecycling = impacts.*weights;
 % Eco_Efficiency.Eco_Impact = dot(impacts,weights');
 
 
-Eco_Efficiency.Eco_Impact = Eco_Efficiency.Sum.Impact_Assembly + ...
-    Eco_Efficiency.Sum.Impact_UsePhase + Eco_Efficiency.Sum.Impact_Recycling;
+Eco_Efficiency.Eco_Impact = (Eco_Efficiency.Sum.Impact_Assembly + ...
+    Eco_Efficiency.Sum.Impact_UsePhase + Eco_Efficiency.Sum.Impact_Recycling)...
+    /(Param.TCO.Annual_mileage(1)*Param.TCO.Operating_life(1)*(Param.vehicle.payload/1000));
 
 %% Return results
 
